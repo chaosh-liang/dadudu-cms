@@ -3,17 +3,12 @@ import { RouteComponentProps, Link, Route, Switch, Redirect } from 'react-router
 import Goods from 'src/components/goods/Goods';
 import Order from 'src/components/order/Order';
 import Settings from 'src/components/settings/Settings';
-import http from 'axios'
 import { Layout, Menu } from 'antd';
 const { Header, Content } = Layout;
 
 
 const Home: FC<RouteComponentProps> = (props) => {
   const { match: { path } } = props;
-  const fetchData = async () => {
-    const res = await http.get('http://127.0.0.1:7716/api/goods')
-    console.log('home fetch all goods => ', res);
-  };
   const [contentvh, setContentvh] = useState(600); // 计算高度
   const menu = [
     { name: '商品列表', route: 'goods' },
@@ -21,7 +16,6 @@ const Home: FC<RouteComponentProps> = (props) => {
     { name: '设置中心', route: 'settings' }
   ];
   useEffect(() => {
-    fetchData();
     const rootEl = document.getElementById('root');
     if (rootEl) setContentvh(rootEl?.offsetHeight - 64);
   }, []);
