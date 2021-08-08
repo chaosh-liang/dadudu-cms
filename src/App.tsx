@@ -1,8 +1,21 @@
 import React from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import Home from 'src/view/home/Home';
+import Login from 'src/view/login/Login';
+import Order from 'src/view/order/Order';
+import NoMatch from 'src/view/404/NoMatch';
+import 'antd/dist/antd.css';
 
-function App() {
+const App = () => {
   return (
-    <div className="app">大嘟嘟 后台管理系统</div>
+    <BrowserRouter>
+      <Switch>
+        <Route path="/home" render={props => <Home {...props} />} />
+        <Route path="/login" render={props => <Login {...props} />} />
+        <Route path="/order" render={props => <Order {...props} />} />
+        <Route path="*" render={props => <NoMatch {...props} />} />
+      </Switch>
+    </BrowserRouter>
   );
 }
 
