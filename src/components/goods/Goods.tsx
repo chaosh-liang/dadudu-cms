@@ -101,12 +101,13 @@ const Goods: FC<RouteComponentProps> = (props) => {
     fetchData();
   }, []);
 
+  // add params
   const params: goodsType = {
     name: 'iphone13',
     banner_url: [
       {
         path: '/assets/images/banner/rabit.png',
-      }
+      },
     ],
     category_id: '60f433ca9f5a87b9f4c71941',
     desc: 'Apple iPhone 13 128G',
@@ -119,22 +120,48 @@ const Goods: FC<RouteComponentProps> = (props) => {
     desc_url: [
       {
         path: '/assets/images/detail/detail1.png',
-      }
+      },
     ],
     home_display: true,
     currency_unit: '￥',
-    count_unit: '个'
+    count_unit: '个',
+  };
+
+  // edit params
+  const params2 = {
+    _id: '611149f98f66013b50690383',
+    name: 'iphone 13',
+    series_id: '6107f6df614e499df39c621b',
+    desc_url: [
+      {
+        path: '/assets/images/detail/detail1.png',
+        _id: '611149f98f66013b50690381',
+      },
+      {
+        path: '/assets/images/detail/detail2.png',
+        _id: '611149f98f66013b50690382',
+      },
+    ],
+  };
+  const editGoods = async (data: Partial<goodsType> & { _id: string }) => {
+    const res = await http.put('http://127.0.0.1:7716/api/goods/update', data);
+    console.log('home update goods => ', res);
   };
 
   const addGoods = async (data: goodsType) => {
     const res = await http.post('http://127.0.0.1:7716/api/goods/add', data);
-    console.log('home fetch all goods => ', res);
+    console.log('home add goods => ', res);
   };
 
   return (
     <>
       <Table columns={columns} dataSource={data} />
       <Button onClick={() => addGoods(params)}>添加商品</Button>
+      <br />
+      <br />
+      <Button onClick={() => editGoods(params2)}>
+        修改商品：611149f98f66013b50690383
+      </Button>
     </>
   );
 };
