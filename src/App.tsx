@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import Home from 'src/view/home/Home';
 import Login from 'src/view/login/Login';
 import Order from 'src/view/order/Order';
@@ -13,7 +13,8 @@ const App = () => {
         <Route path="/home" render={props => <Home {...props} />} />
         <Route path="/login" render={props => <Login {...props} />} />
         <Route path="/order" render={props => <Order {...props} />} />
-        <Route path="*" render={props => <NoMatch {...props} />} />
+        {/* <Route path="*" render={props => <NoMatch {...props} />} /> */}
+        <Redirect to="/home" />
       </Switch>
     </BrowserRouter>
   );

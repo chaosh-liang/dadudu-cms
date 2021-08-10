@@ -1,7 +1,8 @@
 import React, { FC, useState, useEffect } from 'react';
 import http from 'axios';
 import { RouteComponentProps } from 'react-router-dom';
-import { Table, Tag, Space, Button } from 'antd';
+import { Table, Tag, Space, Button, Image, Upload, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import type { goodsType } from 'src/@types/goods';
 
 const columns = [
@@ -101,6 +102,22 @@ const Goods: FC<RouteComponentProps> = (props) => {
     fetchData();
   }, []);
 
+  const props2 = {
+    name: 'file',
+    multiple: true,
+    action: 'https://localhost:7031/upload',
+    onChange(info: any) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully`);
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+  };
+
   // add params
   const params: goodsType = {
     name: 'iphone13',
@@ -130,7 +147,7 @@ const Goods: FC<RouteComponentProps> = (props) => {
   // edit params
   const params2 = {
     _id: '611149f98f66013b50690383',
-    name: 'iphone 13',
+    name: 'iphone 133',
     series_id: '6107f6df614e499df39c621b',
     desc_url: [
       {
@@ -164,6 +181,13 @@ const Goods: FC<RouteComponentProps> = (props) => {
   return (
     <>
       <Table columns={columns} dataSource={data} />
+      <br />
+      <Upload {...props2}>
+        <Button icon={<UploadOutlined />}>Click to Upload</Button>
+      </Upload>
+      <br />
+      <Image src="http://localhost:7031/upload/bootstrap.png" width={200} />
+      <br />
       <Button onClick={() => addGoods(params)}>添加商品</Button>
       <br />
       <br />
