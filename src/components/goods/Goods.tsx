@@ -143,7 +143,15 @@ const Goods: FC<RouteComponentProps> = (props) => {
       },
     ],
   };
-  const editGoods = async (data: Partial<goodsType> & { _id: string }) => {
+
+  const params3: { ids: string[] } = { ids: ['611149f98f66013b50690383', '611149f98f66013b50690384'] };
+
+  const deleteGoods = async (data: { ids: string[] }) => {
+    const res = await http.delete('http://127.0.0.1:7716/api/goods/delete', { data });
+    console.log('home update goods => ', res);
+  };
+
+  const editGoods = async (data: Partial<goodsType>) => {
     const res = await http.put('http://127.0.0.1:7716/api/goods/update', data);
     console.log('home update goods => ', res);
   };
@@ -161,6 +169,11 @@ const Goods: FC<RouteComponentProps> = (props) => {
       <br />
       <Button onClick={() => editGoods(params2)}>
         修改商品：611149f98f66013b50690383
+      </Button>
+      <br />
+      <br />
+      <Button onClick={() => deleteGoods(params3)}>
+        删除商品：611149f98f66013b50690383 & 4
       </Button>
     </>
   );
