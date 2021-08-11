@@ -1,9 +1,11 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { FC, useState, useEffect } from 'react';
 import http from 'axios';
 import { RouteComponentProps } from 'react-router-dom';
 import { Table, Tag, Space, Button, Image, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { goodsType } from 'src/@types/goods';
+import { UploadChangeParam } from 'antd/lib/upload';
 
 const columns = [
   {
@@ -102,18 +104,18 @@ const Goods: FC<RouteComponentProps> = (props) => {
     fetchData();
   }, []);
 
+  // upload params
   const props2 = {
     name: 'file',
     multiple: true,
-    action: 'https://localhost:7031/upload',
-    onChange(info: any) {
-      if (info.file.status !== 'uploading') {
-        console.log(info.file, info.fileList);
-      }
-      if (info.file.status === 'done') {
-        message.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === 'error') {
-        message.error(`${info.file.name} file upload failed.`);
+    action: 'http://localhost:7031/upload',
+    onChange({ file, fileList }: UploadChangeParam) {
+      const { name, status } = file;
+      if (status === 'done') {
+        message.success(`${name} file uploaded successfully`);
+        console.log('fileList => ', fileList);
+      } else if (status === 'error') {
+        message.error(`${name} file upload failed.`);
       }
     },
   };
@@ -161,6 +163,7 @@ const Goods: FC<RouteComponentProps> = (props) => {
     ],
   };
 
+  // delete params
   const params3: { ids: string[] } = { ids: ['611149f98f66013b50690383', '611149f98f66013b50690384'] };
 
   const deleteGoods = async (data: { ids: string[] }) => {
