@@ -6,105 +6,142 @@ import { Table, Tag, Space, Button, Image, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { goodsType } from 'src/@types/goods';
 import { UploadChangeParam } from 'antd/lib/upload';
+import type { ColumnType } from 'rc-table/lib/interface';
+import { useMount, useRequest } from 'ahooks';
+import { fetchAllGoods } from 'src/api/goods';
+import styles from './Goods.module.scss';
 
-const columns = [
+/* {
+  'name': 'iphone12',
+  'discount_price':5599.69,
+  'discount_threshold':10,
+  'price':6099.69,
+  'currency_unit': '￥',
+  'count_unit': '个',
+  'home_banner':true,
+  'home_display': true,
+  'desc':'Apple iPhone 12 128G 蓝色 5G 手机 Apple iPhone 12 128G 蓝色 5G 手机',
+  'icon_url':'/assets/images/iphone.jpg',
+  'series_id':{'_id':'ObjectId(60f586450811e699dc39fbc7')},
+  'category_id': {'_id':ObjectId('60f433ca9f5a87b9f4c71941')},
+  'desc_url':[{ _id: ObjectId('1234'), path: string }],
+  'banner_url': [{ _id: ObjectId('1234'), path: string }]
+} */
+
+// 表格列定义
+const columns: ColumnType<any>[] = [
   {
-    title: 'Name',
+    title: '名称',
     dataIndex: 'name',
     key: 'name',
+    align: 'center',
     render: (text: string) => <a>{text}</a>,
   },
   {
-    title: 'Age',
-    dataIndex: 'age',
-    key: 'age',
+    title: '价格',
+    dataIndex: 'price',
+    key: 'price',
+    align: 'center',
   },
   {
-    title: 'Address',
-    dataIndex: 'address',
-    key: 'address',
+    title: '折后价',
+    dataIndex: 'discount_price',
+    key: 'discount_price',
+    align: 'center',
   },
   {
-    title: 'Tags',
-    key: 'tags',
-    dataIndex: 'tags',
-    render: (tags: string[]) => (
-      <>
-        {tags.map((tag) => {
-          let color = tag.length > 5 ? 'geekblue' : 'green';
-          if (tag === 'loser') {
-            color = 'volcano';
-          }
-          return (
-            <Tag color={color} key={tag}>
-              {tag.toUpperCase()}
-            </Tag>
-          );
-        })}
-      </>
-    ),
+    title: '打折阈值',
+    dataIndex: 'discount_threshold',
+    key: 'discount_threshold',
+    align: 'center',
   },
   {
-    title: 'Action',
+    title: '数量单位',
+    dataIndex: 'count_unit',
+    key: 'count_unit',
+    align: 'center',
+  },
+  {
+    title: '货币单位',
+    dataIndex: 'currency_unit',
+    key: 'currency_unit',
+    align: 'center',
+  },
+  {
+    title: '描述',
+    dataIndex: 'desc',
+    key: 'desc',
+    align: 'center',
+  },
+  {
+    title: '类别',
+    dataIndex: 'category',
+    key: 'category',
+    align: 'center',
+  },
+  {
+    title: '系列',
+    dataIndex: 'series',
+    key: 'series',
+    align: 'center',
+  },
+  {
+    title: '主页轮播',
+    dataIndex: 'home_banner',
+    key: 'home_banner',
+    align: 'center',
+  },
+  {
+    title: '主页展示',
+    dataIndex: 'home_display',
+    key: 'home_display',
+    align: 'center',
+  },
+  {
+    title: '操作',
     key: 'action',
+    align: 'center',
     render: (text: string, record: Record<string, any>) => (
-      <Space size='middle'>
-        <a>Invite {record.name}</a>
-        <a>Delete</a>
+      <Space size='small'>
+        <Button className={styles['operation-btn']} type='link'>预览</Button>
+        <Button className={styles['operation-btn']}  type='link'>编辑</Button>
+        <Button className={styles['operation-btn']}  type='link'>删除</Button>
       </Space>
     ),
   },
 ];
 
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    tags: ['nice', 'developer'],
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    tags: ['loser'],
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    tags: ['cool', 'teacher'],
-  },
-];
-
 const Goods: FC<RouteComponentProps> = (props) => {
-  const [total, setTotal] = useState(0);
-  const [goodsData, setGoodsData] = useState([]);
-  const fetchData = async () => {
-    const res = await http.post('http://127.0.0.1:7716/api/goods', {
-      page_index: 1,
-      page_size: 10,
-    });
-    console.log('home fetch all goods => ', res);
-    if (res?.data?.code === 200) {
-      const {
-        data: {
-          code,
-          data: { res: goods, total: t },
-        },
-      } = res;
-      setGoodsData(goods);
-      setTotal(t);
-    }
-  };
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const [gt, setGt] = useState(0); // 为了触发获取商品请求
+  const [page_index, setPageIndex] = useState(1);
+  const [page_size, setPageSize] = useState(10);
+  // const [tableData, setTableData] = useState([]);
 
-  // upload params
+  // 获取所有商品
+  const { data, loading: fetchAllGoodsLoading } = useRequest(
+    fetchAllGoods.bind(null, { page_index, page_size }),
+    {
+      refreshDeps: [gt, page_index, page_size],
+      formatResult({ res, total }) {
+        // 格式化接口返回的数据
+        // console.log('formatResult => ', res);
+        const goods = res.map((item: goodsType) => {
+          const { _id: key, series_id, category_id, home_banner, home_display } = item;
+          return {
+            ...item,
+            key,
+            series: series_id,
+            category: category_id,
+            home_banner: home_banner ? '是' : '否',
+            home_display: home_display ? '是' : '否',
+          };
+        });
+        return { goods, total };
+      },
+    }
+  );
+
+  /* // upload params
   const props2 = {
     name: 'file',
     multiple: true,
@@ -164,10 +201,14 @@ const Goods: FC<RouteComponentProps> = (props) => {
   };
 
   // delete params
-  const params3: { ids: string[] } = { ids: ['611149f98f66013b50690383', '611149f98f66013b50690384'] };
+  const params3: { ids: string[] } = {
+    ids: ['611149f98f66013b50690383', '611149f98f66013b50690384'],
+  };
 
   const deleteGoods = async (data: { ids: string[] }) => {
-    const res = await http.delete('http://127.0.0.1:7716/api/goods/delete', { data });
+    const res = await http.delete('http://127.0.0.1:7716/api/goods/delete', {
+      data,
+    });
     console.log('home update goods => ', res);
   };
 
@@ -179,17 +220,21 @@ const Goods: FC<RouteComponentProps> = (props) => {
   const addGoods = async (data: goodsType) => {
     const res = await http.post('http://127.0.0.1:7716/api/goods/add', data);
     console.log('home add goods => ', res);
-  };
+  }; */
 
   return (
-    <>
-      <Table columns={columns} dataSource={data} />
-      <br />
+    <div className={styles.container}>
+      <Table
+        loading={fetchAllGoodsLoading}
+        columns={columns}
+        dataSource={data?.goods ?? []}
+      />
+      {/*  <br />
       <Upload {...props2}>
         <Button icon={<UploadOutlined />}>Click to Upload</Button>
       </Upload>
       <br />
-      <Image src="http://localhost:7031/upload/bootstrap.png" width={200} />
+      <Image src='http://localhost:7031/upload/bootstrap.png' width={200} />
       <br />
       <Button onClick={() => addGoods(params)}>添加商品</Button>
       <br />
@@ -202,7 +247,10 @@ const Goods: FC<RouteComponentProps> = (props) => {
       <Button onClick={() => deleteGoods(params3)}>
         删除商品：611149f98f66013b50690383 & 4
       </Button>
-    </>
+      <div>{JSON.stringify(goods)}</div>
+      <br />
+      <hr /> */}
+    </div>
   );
 };
 
