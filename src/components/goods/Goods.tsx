@@ -56,13 +56,13 @@ const columns: ColumnType<any>[] = [
     align: 'center',
   },
   {
-    title: '数量单位',
+    title: '单位',
     dataIndex: 'count_unit',
     key: 'count_unit',
     align: 'center',
   },
   {
-    title: '货币单位',
+    title: '货币',
     dataIndex: 'currency_unit',
     key: 'currency_unit',
     align: 'center',

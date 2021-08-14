@@ -5,6 +5,7 @@ import Login from 'src/view/login/Login';
 import Order from 'src/view/order/Order';
 // import NoMatch from 'src/view/404/NoMatch';
 import 'antd/dist/antd.css';
+import 'src/assets/scss/common.scss'
 
 const App = () => {
   return (
