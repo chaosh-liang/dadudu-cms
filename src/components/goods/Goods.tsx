@@ -9,7 +9,6 @@ import { UploadChangeParam } from 'antd/lib/upload';
 import type { ColumnType } from 'rc-table/lib/interface';
 import { useMount, useRequest } from 'ahooks';
 import { fetchAllGoods } from 'src/api/goods';
-import { fetchSeriesByCategoryId } from 'src/api/category';
 import styles from './Goods.module.scss';
 
 /* {
@@ -32,6 +31,12 @@ import styles from './Goods.module.scss';
 // 表格列定义
 const columns: ColumnType<any>[] = [
   {
+    title: '序号',
+    dataIndex: 'sequence',
+    key: 'sequence',
+    align: 'center'
+  },
+  {
     title: '名称',
     dataIndex: 'name',
     key: 'name',
@@ -45,15 +50,15 @@ const columns: ColumnType<any>[] = [
     align: 'center',
   },
   {
-    title: '折后价',
-    dataIndex: 'discount_price',
-    key: 'discount_price',
+    title: '折扣数量',
+    dataIndex: 'discount_threshold',
+    key: 'discount_threshold',
     align: 'center',
   },
   {
-    title: '打折阈值',
-    dataIndex: 'discount_threshold',
-    key: 'discount_threshold',
+    title: '折扣价',
+    dataIndex: 'discount_price',
+    key: 'discount_price',
     align: 'center',
   },
   {
@@ -70,14 +75,14 @@ const columns: ColumnType<any>[] = [
   },
   {
     title: '类别',
-    dataIndex: 'category',
-    key: 'category',
+    dataIndex: 'category_name',
+    key: 'category_name',
     align: 'center',
   },
   {
     title: '系列',
-    dataIndex: 'series',
-    key: 'series',
+    dataIndex: 'series_name',
+    key: 'series_name',
     align: 'center',
   },
   {
@@ -104,9 +109,15 @@ const columns: ColumnType<any>[] = [
     align: 'center',
     render: (text: string, record: Record<string, any>) => (
       <Space size='small'>
-        <Button className={styles['operation-btn']} type='link'>预览</Button>
-        <Button className={styles['operation-btn']}  type='link'>编辑</Button>
-        <Button className={styles['operation-btn']}  type='link'>删除</Button>
+        <Button className={styles['operation-btn']} type='link'>
+          预览
+        </Button>
+        <Button className={styles['operation-btn']} type='link'>
+          编辑
+        </Button>
+        <Button className={styles['operation-btn']} type='link'>
+          删除
+        </Button>
       </Space>
     ),
   },
@@ -123,27 +134,41 @@ const Goods: FC<RouteComponentProps> = (props) => {
     fetchAllGoods.bind(null, { page_index, page_size }),
     {
       refreshDeps: [gt, page_index, page_size],
-      async formatResult({ res, total }) {
+      formatResult({ res, total, page_index, page_size }) {
         // 格式化接口返回的数据
         // console.log('formatResult => ', res);
-        const goods = res.map((item: GoodsT) => {
-          const { _id: key, series_id, category_id, home_banner, home_display } = item;
+        const goods = res.map((item: GoodsT, index: number) => {
+          const sequence = `0${(page_index - 1) * page_size + index + 1}`.slice(-2); // 序号
+          const {
+            _id: key,
+            home_banner,
+            home_display,
+            series_data: { 0: { name: series_name } },
+            category_data: { 0: { name: category_name } },
+          } = item;
           return {
             ...item,
             key,
-            series: series_id,
-            category: category_id,
+            sequence,
+            series_name,
+            category_name,
             home_banner: home_banner ? '是' : '否',
             home_display: home_display ? '是' : '否',
           };
         });
-        const seriesArray = res.map((item: GoodsT) => fetchSeriesByCategoryId(item.category_id))
-        const seriesRes = await Promise.all(seriesArray);
-        console.log('seriesRes => ', seriesRes);
-        return { goods, total };
+        return { goods, total, page_index, page_size  };
       },
     }
   );
+
+  const pageNumChange = (page_index: number) => {
+    // console.log('pageNumChange ', page_index);
+    setPageIndex(page_index);
+  };
+  const pageSizeChange = (page_index: number, page_size: number) => {
+    // console.log('pageSizeChange ', page_index, page_size);
+    setPageSize(page_size);
+  };
 
   /* // upload params
   const props2 = {
@@ -229,10 +254,21 @@ const Goods: FC<RouteComponentProps> = (props) => {
   return (
     <div className={styles.container}>
       <Table
+        size="middle"
         loading={fetchAllGoodsLoading}
         columns={columns}
-        // dataSource={data?.goods ?? []}
-        dataSource={[]}
+        dataSource={data?.goods ?? []}
+        pagination={{
+          showSizeChanger: true, // 是否可以改变 pageSize boolean
+          // total: 803, // 调试使用
+          total: data?.total ?? 0, // 数据总数 number
+          current: data?.page_index ?? 1, // 当前页数 number
+          onChange: pageNumChange, // 页码改变的回调，参数是改变后的页码及每页条数 Function(page, pageSize)
+          pageSizeOptions: ['10', '15', '20', '50'], // 指定每页可以显示多少条 string[]
+          onShowSizeChange: pageSizeChange, // pageSize 变化的回调 Function(current, size)
+          // showTotal: total => (`共 ${total} 条数据`), // 调试使用
+          showTotal: total => (`共 ${data?.total ?? 0} 条数据`) // 用于显示数据总量和当前数据顺序 Function(total, range)
+        }}
       />
       {/*  <br />
       <Upload {...props2}>
