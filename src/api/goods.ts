@@ -1,5 +1,5 @@
 import Service from './http';
-import type { goodsType } from 'src/@types/goods';
+import type { GoodsT } from 'src/@types/goods';
 const service = new Service();
 
 const ALL_GOODS = '/api/goods';
@@ -12,9 +12,9 @@ export const fetchAllGoods = (data: {
   page_size: number;
 }) => service.postData(ALL_GOODS, data);
 
-export const addGoods = (data: goodsType) => service.postData(ADD_GOODS, data);
+export const addGoods = (data: GoodsT) => service.postData(ADD_GOODS, data);
 
-export const editGoods = (data: Partial<goodsType>) =>
+export const editGoods = (data: Partial<GoodsT>) =>
   service.putData(UPDATE_GOODS, data);
 
 export const deleteGoods = (data: { ids: string[] }) =>

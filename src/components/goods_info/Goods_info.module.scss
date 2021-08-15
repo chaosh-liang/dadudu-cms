@@ -3,7 +3,7 @@
   flex-direction: row;
   min-height: 0;
   background: #f0f2f5;
-  :global(.ant-menu-root.ant-menu-inline) {
+  :global(.ant-menu-root.ant-menu-vertical) {
     margin-right: 20px;
   }
   :global(.ant-layout-content) {

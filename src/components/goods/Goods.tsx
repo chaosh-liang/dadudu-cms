@@ -4,11 +4,12 @@ import http from 'axios';
 import { RouteComponentProps } from 'react-router-dom';
 import { Table, Tag, Space, Button, Image, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import type { goodsType } from 'src/@types/goods';
+import type { GoodsT } from 'src/@types/goods';
 import { UploadChangeParam } from 'antd/lib/upload';
 import type { ColumnType } from 'rc-table/lib/interface';
 import { useMount, useRequest } from 'ahooks';
 import { fetchAllGoods } from 'src/api/goods';
+import { fetchSeriesByCategoryId } from 'src/api/category';
 import styles from './Goods.module.scss';
 
 /* {
@@ -68,12 +69,6 @@ const columns: ColumnType<any>[] = [
     align: 'center',
   },
   {
-    title: '描述',
-    dataIndex: 'desc',
-    key: 'desc',
-    align: 'center',
-  },
-  {
     title: '类别',
     dataIndex: 'category',
     key: 'category',
@@ -95,6 +90,12 @@ const columns: ColumnType<any>[] = [
     title: '主页展示',
     dataIndex: 'home_display',
     key: 'home_display',
+    align: 'center',
+  },
+  {
+    title: '描述',
+    dataIndex: 'desc',
+    key: 'desc',
     align: 'center',
   },
   {
@@ -122,10 +123,10 @@ const Goods: FC<RouteComponentProps> = (props) => {
     fetchAllGoods.bind(null, { page_index, page_size }),
     {
       refreshDeps: [gt, page_index, page_size],
-      formatResult({ res, total }) {
+      async formatResult({ res, total }) {
         // 格式化接口返回的数据
         // console.log('formatResult => ', res);
-        const goods = res.map((item: goodsType) => {
+        const goods = res.map((item: GoodsT) => {
           const { _id: key, series_id, category_id, home_banner, home_display } = item;
           return {
             ...item,
@@ -136,6 +137,9 @@ const Goods: FC<RouteComponentProps> = (props) => {
             home_display: home_display ? '是' : '否',
           };
         });
+        const seriesArray = res.map((item: GoodsT) => fetchSeriesByCategoryId(item.category_id))
+        const seriesRes = await Promise.all(seriesArray);
+        console.log('seriesRes => ', seriesRes);
         return { goods, total };
       },
     }
@@ -158,7 +162,7 @@ const Goods: FC<RouteComponentProps> = (props) => {
   };
 
   // add params
-  const params: goodsType = {
+  const params: GoodsT = {
     name: 'iphone13',
     banner_url: [
       {
@@ -212,12 +216,12 @@ const Goods: FC<RouteComponentProps> = (props) => {
     console.log('home update goods => ', res);
   };
 
-  const editGoods = async (data: Partial<goodsType>) => {
+  const editGoods = async (data: Partial<GoodsT>) => {
     const res = await http.put('http://127.0.0.1:7716/api/goods/update', data);
     console.log('home update goods => ', res);
   };
 
-  const addGoods = async (data: goodsType) => {
+  const addGoods = async (data: GoodsT) => {
     const res = await http.post('http://127.0.0.1:7716/api/goods/add', data);
     console.log('home add goods => ', res);
   }; */
@@ -227,7 +231,8 @@ const Goods: FC<RouteComponentProps> = (props) => {
       <Table
         loading={fetchAllGoodsLoading}
         columns={columns}
-        dataSource={data?.goods ?? []}
+        // dataSource={data?.goods ?? []}
+        dataSource={[]}
       />
       {/*  <br />
       <Upload {...props2}>

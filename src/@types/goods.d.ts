@@ -3,7 +3,7 @@ export interface BannerDescUrlType {
   path: string;
 }
 
-export interface goodsType {
+export interface GoodsT {
   name: string;
   desc: string;
   icon_url: string;

@@ -8,7 +8,7 @@ export default class HttpService {
     this.axios = new Interceptors().getInterceptors();
   }
 
-  public getData(url: string, params: any) {
+  public getData(url: string, params?: any) {
     return new Promise((resolve, reject) => {
       this.axios
         .get(url, params)
