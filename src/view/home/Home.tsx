@@ -18,9 +18,9 @@ const Home: FC<RouteComponentProps> = (props) => {
     match: { path },
   } = props;
   const menu = [
-    { name: '商品信息', route: 'goods' },
-    { name: '订单管理', route: 'order' },
-    { name: '设置中心', route: 'settings' },
+    { name: '商品信息', route: '/home/goods' },
+    { name: '订单管理', route: '/home/order' },
+    { name: '设置中心', route: '/home/settings' },
   ];
   return (
     <div className={styles.container}>

@@ -251,8 +251,11 @@ const Goods: FC<RouteComponentProps> = (props) => {
     console.log('home add goods => ', res);
   }; */
 
+  // TODO: 表格列 => 创建时间 更新时间
+
   return (
     <div className={styles.container}>
+      <h4>商品列表</h4>
       <Table
         size="middle"
         loading={fetchAllGoodsLoading}
