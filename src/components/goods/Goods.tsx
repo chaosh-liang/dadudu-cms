@@ -2,7 +2,19 @@
 import React, { FC, useState, useEffect } from 'react';
 import http from 'axios';
 import { RouteComponentProps } from 'react-router-dom';
-import { Table, Tag, Space, Button, Image, Upload, message } from 'antd';
+import {
+  Table,
+  Tag,
+  Space,
+  Button,
+  Modal,
+  Image,
+  Upload,
+  message,
+  Popconfirm,
+  Form,
+  Input
+} from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { GoodsT } from 'src/@types/goods';
 import { UploadChangeParam } from 'antd/lib/upload';
@@ -29,115 +41,11 @@ import styles from './Goods.module.scss';
   'banner_url': [{ _id: ObjectId('1234'), path: string }]
 } */
 
-// 表格列定义
-const columns: ColumnType<any>[] = [
-  {
-    title: '序号',
-    dataIndex: 'sequence',
-    key: 'sequence',
-    align: 'center'
-  },
-  {
-    title: '名称',
-    dataIndex: 'name',
-    key: 'name',
-    align: 'center',
-  },
-  {
-    title: '价格',
-    dataIndex: 'price',
-    key: 'price',
-    align: 'center',
-  },
-  {
-    title: '折扣数量',
-    dataIndex: 'discount_threshold',
-    key: 'discount_threshold',
-    align: 'center',
-  },
-  {
-    title: '折扣价',
-    dataIndex: 'discount_price',
-    key: 'discount_price',
-    align: 'center',
-  },
-  {
-    title: '单位',
-    dataIndex: 'count_unit',
-    key: 'count_unit',
-    align: 'center',
-  },
-  {
-    title: '货币',
-    dataIndex: 'currency_unit',
-    key: 'currency_unit',
-    align: 'center',
-  },
-  {
-    title: '类别',
-    dataIndex: 'category_name',
-    key: 'category_name',
-    align: 'center',
-  },
-  {
-    title: '系列',
-    dataIndex: 'series_name',
-    key: 'series_name',
-    align: 'center',
-  },
-  {
-    title: '主页轮播',
-    dataIndex: 'home_banner',
-    key: 'home_banner',
-    align: 'center',
-  },
-  {
-    title: '主页展示',
-    dataIndex: 'home_display',
-    key: 'home_display',
-    align: 'center',
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'create_time',
-    key: 'create_time',
-    align: 'center',
-  },
-  {
-    title: '更新时间',
-    dataIndex: 'update_time',
-    key: 'update_time',
-    align: 'center',
-  },
-  {
-    title: '描述',
-    dataIndex: 'desc',
-    key: 'desc',
-    align: 'center',
-  },
-  {
-    title: '操作',
-    key: 'action',
-    align: 'center',
-    render: (text: string, record: Record<string, any>) => (
-      <Space size='small'>
-        <Button className={styles['operation-btn']} type='link'>
-          预览
-        </Button>
-        <Button className={styles['operation-btn']} type='link'>
-          编辑
-        </Button>
-        <Button className={styles['operation-btn']} type='link'>
-          删除
-        </Button>
-      </Space>
-    ),
-  },
-];
-
 const Goods: FC<RouteComponentProps> = (props) => {
   const [gt, setGt] = useState(0); // 为了触发获取商品请求
   const [page_index, setPageIndex] = useState(1);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState('添加商品');
   const [page_size, setPageSize] = useState(10);
   // const [tableData, setTableData] = useState([]);
 
@@ -150,15 +58,21 @@ const Goods: FC<RouteComponentProps> = (props) => {
         // 格式化接口返回的数据
         // console.log('formatResult => ', res);
         const goods = res.map((item: GoodsT, index: number) => {
-          const sequence = `0${(page_index - 1) * page_size + index + 1}`.slice(-2); // 序号
+          const sequence = `0${(page_index - 1) * page_size + index + 1}`.slice(
+            -2
+          ); // 序号
           const {
             _id: key,
             home_banner,
             home_display,
             create_time,
             update_time,
-            series_data: { 0: { name: series_name } },
-            category_data: { 0: { name: category_name } },
+            series_data: {
+              0: { name: series_name },
+            },
+            category_data: {
+              0: { name: category_name },
+            },
           } = item;
           return {
             ...item,
@@ -172,7 +86,7 @@ const Goods: FC<RouteComponentProps> = (props) => {
             update_time: update_time && formatDate(update_time),
           };
         });
-        return { goods, total, page_index, page_size  };
+        return { goods, total, page_index, page_size };
       },
     }
   );
@@ -267,28 +181,191 @@ const Goods: FC<RouteComponentProps> = (props) => {
     console.log('home add goods => ', res);
   }; */
 
-  // TODO: 表格列 => 创建时间 更新时间
+  // 保存：确定
+  const handleSave = () => {
+    console.log('handleSave');
+  };
+
+  // 保存：取消
+  const handleCancel = () => {
+    console.log('handleCancel');
+    setIsModalVisible(false);
+  };
+
+  // 添加
+  const addGoods = () => {
+    setModalTitle('添加商品');
+    setIsModalVisible(true);
+    console.log('addGoods');
+  };
+
+  // 编辑
+  const editGoods = (record: GoodsT) => {
+    setModalTitle('编辑商品');
+    setIsModalVisible(true);
+    console.log('editGoods => ', record);
+  };
+
+  // 删除
+  const handleDelete = (id: string) => {
+    console.log('handleDelete', id);
+  };
+
+  // 表格列定义
+  const columns: ColumnType<any>[] = [
+    {
+      title: '序号',
+      dataIndex: 'sequence',
+      key: 'sequence',
+      align: 'center',
+    },
+    {
+      title: '名称',
+      dataIndex: 'name',
+      key: 'name',
+      align: 'center',
+    },
+    {
+      title: '价格',
+      dataIndex: 'price',
+      key: 'price',
+      align: 'center',
+    },
+    {
+      title: '折扣数量',
+      dataIndex: 'discount_threshold',
+      key: 'discount_threshold',
+      align: 'center',
+    },
+    {
+      title: '折扣价',
+      dataIndex: 'discount_price',
+      key: 'discount_price',
+      align: 'center',
+    },
+    {
+      title: '单位',
+      dataIndex: 'count_unit',
+      key: 'count_unit',
+      align: 'center',
+    },
+    {
+      title: '货币',
+      dataIndex: 'currency_unit',
+      key: 'currency_unit',
+      align: 'center',
+    },
+    {
+      title: '类别',
+      dataIndex: 'category_name',
+      key: 'category_name',
+      align: 'center',
+    },
+    {
+      title: '系列',
+      dataIndex: 'series_name',
+      key: 'series_name',
+      align: 'center',
+    },
+    {
+      title: '主页轮播',
+      dataIndex: 'home_banner',
+      key: 'home_banner',
+      align: 'center',
+    },
+    {
+      title: '主页展示',
+      dataIndex: 'home_display',
+      key: 'home_display',
+      align: 'center',
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'create_time',
+      key: 'create_time',
+      align: 'center',
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'update_time',
+      key: 'update_time',
+      align: 'center',
+    },
+    {
+      title: '描述',
+      dataIndex: 'desc',
+      key: 'desc',
+      align: 'center',
+    },
+    {
+      title: '操作',
+      key: 'action',
+      align: 'center',
+      render: (text: string, record: GoodsT) => (
+        <Space size='small'>
+          <Button className={styles['operation-btn']} type='link'>
+            预览
+          </Button>
+          <Button
+            className={styles['operation-btn']}
+            type='link'
+            onClick={() => editGoods(record)}
+          >
+            编辑
+          </Button>
+          <Popconfirm
+            title='确定删除?'
+            okText="确认"
+            cancelText="取消"
+            onConfirm={() => handleDelete(record._id ?? '')}
+          >
+            <Button className={styles['operation-btn']} type='link'>
+              删除
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className={styles.container}>
-      <h4>商品列表</h4>
-      <Table
-        size="small"
-        loading={fetchAllGoodsLoading}
-        columns={columns}
-        dataSource={data?.goods ?? []}
-        pagination={{
-          showSizeChanger: true, // 是否可以改变 pageSize boolean
-          // total: 803, // 调试使用
-          total: data?.total ?? 0, // 数据总数 number
-          current: data?.page_index ?? 1, // 当前页数 number
-          onChange: pageNumChange, // 页码改变的回调，参数是改变后的页码及每页条数 Function(page, pageSize)
-          pageSizeOptions: ['10', '15', '20', '50'], // 指定每页可以显示多少条 string[]
-          onShowSizeChange: pageSizeChange, // pageSize 变化的回调 Function(current, size)
-          // showTotal: total => (`共 ${total} 条数据`), // 调试使用
-          showTotal: total => (`共 ${data?.total ?? 0} 条数据`) // 用于显示数据总量和当前数据顺序 Function(total, range)
-        }}
-      />
+      <header className={styles.header}>
+        <h4 className={styles.title}>商品列表</h4>
+        <Button type='primary' size='middle' onClick={addGoods}>
+          添加商品
+        </Button>
+      </header>
+      <section className={styles.section}>
+        <Table
+          size='small'
+          loading={fetchAllGoodsLoading}
+          columns={columns}
+          dataSource={data?.goods ?? []}
+          pagination={{
+            showSizeChanger: true, // 是否可以改变 pageSize boolean
+            // total: 803, // 调试使用
+            total: data?.total ?? 0, // 数据总数 number
+            current: data?.page_index ?? 1, // 当前页数 number
+            onChange: pageNumChange, // 页码改变的回调，参数是改变后的页码及每页条数 Function(page, pageSize)
+            pageSizeOptions: ['10', '15', '20', '50'], // 指定每页可以显示多少条 string[]
+            onShowSizeChange: pageSizeChange, // pageSize 变化的回调 Function(current, size)
+            // showTotal: total => (`共 ${total} 条数据`), // 调试使用
+            showTotal: (total) => `共 ${data?.total ?? 0} 条数据`, // 用于显示数据总量和当前数据顺序 Function(total, range)
+          }}
+        />
+      </section>
+      <Modal
+        destroyOnClose
+        title={modalTitle}
+        visible={isModalVisible}
+        onOk={handleSave}
+        onCancel={handleCancel}
+      >
+        <Form>
+          <Input />
+        </Form>
+      </Modal>
       {/*  <br />
       <Upload {...props2}>
         <Button icon={<UploadOutlined />}>Click to Upload</Button>
