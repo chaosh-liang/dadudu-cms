@@ -9,6 +9,7 @@ import { UploadChangeParam } from 'antd/lib/upload';
 import type { ColumnType } from 'rc-table/lib/interface';
 import { useMount, useRequest } from 'ahooks';
 import { fetchAllGoods } from 'src/api/goods';
+import { formatDate } from 'src/utils';
 import styles from './Goods.module.scss';
 
 /* {
@@ -41,7 +42,6 @@ const columns: ColumnType<any>[] = [
     dataIndex: 'name',
     key: 'name',
     align: 'center',
-    render: (text: string) => <a>{text}</a>,
   },
   {
     title: '价格',
@@ -98,6 +98,18 @@ const columns: ColumnType<any>[] = [
     align: 'center',
   },
   {
+    title: '创建时间',
+    dataIndex: 'create_time',
+    key: 'create_time',
+    align: 'center',
+  },
+  {
+    title: '更新时间',
+    dataIndex: 'update_time',
+    key: 'update_time',
+    align: 'center',
+  },
+  {
     title: '描述',
     dataIndex: 'desc',
     key: 'desc',
@@ -143,6 +155,8 @@ const Goods: FC<RouteComponentProps> = (props) => {
             _id: key,
             home_banner,
             home_display,
+            create_time,
+            update_time,
             series_data: { 0: { name: series_name } },
             category_data: { 0: { name: category_name } },
           } = item;
@@ -154,6 +168,8 @@ const Goods: FC<RouteComponentProps> = (props) => {
             category_name,
             home_banner: home_banner ? '是' : '否',
             home_display: home_display ? '是' : '否',
+            create_time: create_time && formatDate(create_time),
+            update_time: update_time && formatDate(update_time),
           };
         });
         return { goods, total, page_index, page_size  };
@@ -257,7 +273,7 @@ const Goods: FC<RouteComponentProps> = (props) => {
     <div className={styles.container}>
       <h4>商品列表</h4>
       <Table
-        size="middle"
+        size="small"
         loading={fetchAllGoodsLoading}
         columns={columns}
         dataSource={data?.goods ?? []}

@@ -5,21 +5,21 @@ import { fetchCategories } from 'src/api/categoryAndSeries';
 import { useRequest } from 'ahooks';
 import type { ColumnType } from 'rc-table/lib/interface';
 import { Space, Button, Table } from 'antd';
-import type { CategoryT, CatetoryClientT } from 'src/@types/category';
+import type { CategoryT } from 'src/@types/category';
 import styles from './Category.module.scss';
+import { formatDate } from 'src/utils';
 
 
 const Category: FC<RouteComponentProps> = (props) => {
   const {
     match: { path },
   } = props;
-
   // 表格列定义
   const columns: ColumnType<any>[] = [
     {
       title: '序号',
-      dataIndex: 'order',
-      key: 'order',
+      dataIndex: 'sequence',
+      key: 'sequence',
       align: 'center',
     },
     {
@@ -33,6 +33,18 @@ const Category: FC<RouteComponentProps> = (props) => {
       title: '系列数量',
       dataIndex: 'series_count',
       key: 'series_count',
+      align: 'center',
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'create_time',
+      key: 'create_time',
+      align: 'center',
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'update_time',
+      key: 'update_time',
       align: 'center',
     },
     {
@@ -58,6 +70,7 @@ const Category: FC<RouteComponentProps> = (props) => {
     },
   ];
 
+
   // 获取所有商品
   const { data, loading: fetchCategoriesLoading } = useRequest(
     fetchCategories,
@@ -65,12 +78,15 @@ const Category: FC<RouteComponentProps> = (props) => {
       formatResult({ res }) {
         // 格式化接口返回的数据
         // console.log('formatResult => ', res);
-        return res.map((item: CategoryT) => {
-          const { _id: key, series_data } = item;
+        return res.map((item: CategoryT, index: number) => {
+          const { _id: key, series_data, create_time, update_time } = item;
           return {
             ...item,
             key,
+            sequence: `0${index + 1}`.slice(-2),
             series_count: series_data.length,
+            create_time: create_time && formatDate(create_time),
+            update_time: update_time && formatDate(update_time),
           };
         });
       },
@@ -84,7 +100,7 @@ const Category: FC<RouteComponentProps> = (props) => {
         size='middle'
         loading={fetchCategoriesLoading}
         columns={columns}
-        dataSource={data as CategoryT[]}
+        dataSource={data ?? []}
       />
       {/*  <br />
       <Upload {...props2}>

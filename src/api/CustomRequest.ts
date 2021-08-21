@@ -3,27 +3,31 @@ import axios, { AxiosResponse, AxiosInstance } from 'axios';
 const TIMEOUT = 10000;
 const BASE_URL = 'http://127.0.0.1:7716';
 
-export class Interceptors {
-  private instance: AxiosInstance;
+export default class CustomRequest {
+  private static instance: CustomRequest;
+  private axiosInst: AxiosInstance;
 
-  constructor() {
-    this.instance = axios.create({ baseURL: BASE_URL, timeout: TIMEOUT });
-    this.initInterceptors();
+  private constructor() {
+    this.axiosInst = axios.create({ baseURL: BASE_URL, timeout: TIMEOUT });
+    this.setAxiosInterceptors();
   }
-
-  public getInterceptors() {
-    return this.instance;
+  
+  // CustomRequest 单例模式
+  public static getInstance() {
+    if (!CustomRequest.instance) {
+      CustomRequest.instance = new CustomRequest();
+    }
+    return CustomRequest.instance;
   }
-
+  
   // 初始化拦截器
-  public initInterceptors() {
+  private setAxiosInterceptors() {
     // 设置请求头
-    this.instance.defaults.headers.get['Content-Type'] =
-      'application/x-www-form-urlencoded;charset=utf-8';
-    this.instance.defaults.headers.post['Content-Type'] = 'application/json;charset=utf-8';
+    this.axiosInst.defaults.headers.get['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
+    this.axiosInst.defaults.headers.post['Content-Type'] = 'application/json;charset=utf-8';
 
     // 响应拦截器
-    this.instance.interceptors.response.use(
+    this.axiosInst.interceptors.response.use(
       // 请求成功
       (res: AxiosResponse) => {
         // LoadingInstance.close();
@@ -44,6 +48,11 @@ export class Interceptors {
         return Promise.reject(error);
       }
     );
+  }
+
+  // axios 实例
+  public getAxiosInstance() {
+    return this.axiosInst;
   }
 
   /**

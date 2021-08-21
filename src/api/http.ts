@@ -1,11 +1,11 @@
-import { Interceptors } from './interceptor';
+import CustomRequest from './CustomRequest';
 import { message } from 'antd';
 
 export default class HttpService {
   private axios: any;
 
   constructor() {
-    this.axios = new Interceptors().getInterceptors();
+    this.axios = CustomRequest.getInstance().getAxiosInstance();
   }
 
   public getData(url: string, params?: any) {

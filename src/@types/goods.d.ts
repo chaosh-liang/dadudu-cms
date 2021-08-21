@@ -3,7 +3,8 @@ export interface BannerDescUrlType {
   path: string;
 }
 
-export interface GoodsT {
+export interface GoodsT extends Record<string, any> {
+  _id?: string;
   name: string;
   desc: string;
   icon_url: string;
@@ -20,5 +21,4 @@ export interface GoodsT {
   banner_url: BannerDescUrlType[];
   create_time?: string;
   update_time?: string;
-  [x: string]: any;
 }

@@ -1,14 +1,11 @@
 import type { SeriesT } from './series';
-export interface CategoryT {
-  _id: string;
+export interface CategoryT extends Record<string, any> {
+  _id?: string;
   name: string;
   desc: string;
-  order: number;
+  no: number;
   icon_url: string;
   series_data: SeriesT[];
+  create_time?: string;
+  update_time?: string;
 };
-
-export interface CatetoryClientT extends CategoryT {
-  key?: number;
-  series_count: number;
-}
