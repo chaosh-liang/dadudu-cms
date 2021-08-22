@@ -1,4 +1,4 @@
-import Service from './http';
+import Service from '../http';
 import type { GoodsT } from 'src/@types/goods';
 const service = new Service();
 

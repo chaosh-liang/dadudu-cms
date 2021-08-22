@@ -1,4 +1,4 @@
-
+// 格式化日期
 export const formatDate = (data: string | number) => {
   const date = new Date(data);
   const year = date.getFullYear();

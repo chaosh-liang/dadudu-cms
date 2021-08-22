@@ -1,4 +1,4 @@
-import Service from './http';
+import Service from '../http';
 const service = new Service();
 
 const CATEGORY_URL = '/api/category';
