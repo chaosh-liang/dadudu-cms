@@ -95,12 +95,13 @@ const Category: FC<RouteComponentProps> = (props) => {
 
   return (
     <div className={styles.container}>
-      <h4>类别列表</h4>
+      <h4>类别</h4>
       <Table
         size='middle'
         loading={fetchCategoriesLoading}
         columns={columns}
         dataSource={data ?? []}
+        pagination={false}
       />
       {/*  <br />
       <Upload {...props2}>

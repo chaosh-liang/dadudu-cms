@@ -1,11 +1,25 @@
-import CustomRequest from './CustomRequest';
+import createAxios from './axios_custom';
 import { message } from 'antd';
 
-export default class HttpService {
+export default class Service {
   private axios: any;
 
   constructor() {
-    this.axios = CustomRequest.getInstance().getAxiosInstance();
+    this.axios = createAxios();
+  }
+
+  /**
+   * 
+   * @returns axios 实例
+   * @note 此方法用来测试 axios 是否为单例
+   * @note 在某个地方创建两个 Service 类的实例，如
+   * @example
+   *  const service1 = new Service();
+   *  const service1 = new Service();
+   *  console.log(service1.getAxiosInst() === service2.getAxiosInst());
+   */
+  public getAxiosInst() {
+    return this.axios;
   }
 
   public getData(url: string, params?: any) {

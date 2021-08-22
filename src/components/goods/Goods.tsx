@@ -331,7 +331,7 @@ const Goods: FC<RouteComponentProps> = (props) => {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h4 className={styles.title}>商品列表</h4>
+        <h4 className={styles.title}>商品</h4>
         <Button type='primary' size='middle' onClick={addGoods}>
           添加商品
         </Button>

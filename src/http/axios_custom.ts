@@ -3,8 +3,8 @@ import axios, { AxiosResponse, AxiosInstance } from 'axios';
 const TIMEOUT = 10000;
 const BASE_URL = 'http://127.0.0.1:7716';
 
-export default class CustomRequest {
-  private static instance: CustomRequest;
+class CustomAxios {
+  private static instance: CustomAxios;
   private axiosInst: AxiosInstance;
 
   private constructor() {
@@ -12,12 +12,12 @@ export default class CustomRequest {
     this.setAxiosInterceptors();
   }
   
-  // CustomRequest 单例模式
+  // CustomAxios 单例模式
   public static getInstance() {
-    if (!CustomRequest.instance) {
-      CustomRequest.instance = new CustomRequest();
+    if (!CustomAxios.instance) {
+      CustomAxios.instance = new CustomAxios();
     }
-    return CustomRequest.instance;
+    return CustomAxios.instance;
   }
   
   // 初始化拦截器
@@ -78,3 +78,8 @@ export default class CustomRequest {
     }
   }
 }
+
+// 工厂模式
+const createAxios = () => CustomAxios.getInstance().getAxiosInstance();
+
+export default createAxios;

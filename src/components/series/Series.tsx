@@ -95,12 +95,13 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
 
   return (
     <div className={styles.container}>
-      <h4>系列列表</h4>
+      <h4>系列</h4>
       <Table
         size='middle'
         loading={loading}
         columns={columns}
         dataSource={data ?? []}
+        pagination={false}
       />
     </div>
   );
