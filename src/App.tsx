@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
-// import { Provider } from 'react-redux'
-// import store from './store'
+import { Provider } from 'react-redux'
+import store from 'src/store'
 import Home from 'src/view/home/Home';
 import Login from 'src/view/login/Login';
 import Order from 'src/view/order/Order';
@@ -12,17 +12,17 @@ import 'src/assets/scss/antd.override.scss'
 
 const App = () => {
   return (
-    // <Provider store={store}>
-    <BrowserRouter>
-      <Switch>
-        <Route path='/home' render={(props) => <Home {...props} />} />
-        <Route path='/login' render={(props) => <Login {...props} />} />
-        <Route path='/order' render={(props) => <Order {...props} />} />
-        {/* <Route path="*" render={props => <NoMatch {...props} />} /> */}
-        <Redirect to='/home' />
-      </Switch>
-    </BrowserRouter>
-    // </Provider>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Switch>
+          <Route path='/home' render={(props) => <Home {...props} />} />
+          <Route path='/login' render={(props) => <Login {...props} />} />
+          <Route path='/order' render={(props) => <Order {...props} />} />
+          {/* <Route path="*" render={props => <NoMatch {...props} />} /> */}
+          <Redirect to='/home' />
+        </Switch>
+      </BrowserRouter>
+    </Provider>
   );
 };
 

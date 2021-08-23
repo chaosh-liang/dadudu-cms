@@ -1,5 +1,5 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { FC, useState, useEffect } from 'react';
+import { useSelector  } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import { fetchCategories } from 'src/api/categoryAndSeries';
 import { useRequest } from 'ahooks';
@@ -8,6 +8,7 @@ import { Space, Button, Table } from 'antd';
 import type { CategoryT } from 'src/@types/category';
 import styles from './Category.module.scss';
 import { formatDate } from 'src/utils';
+import type { RootState } from 'src/store/index'
 
 
 const Category: FC<RouteComponentProps> = (props) => {
@@ -70,6 +71,7 @@ const Category: FC<RouteComponentProps> = (props) => {
     },
   ];
 
+  const field1 = useSelector((state: RootState) => state.init.field1)
 
   // 获取所有商品
   const { data, loading: fetchCategoriesLoading } = useRequest(
@@ -96,6 +98,7 @@ const Category: FC<RouteComponentProps> = (props) => {
   return (
     <div className={styles.container}>
       <h4>类别</h4>
+      <div>{ field1 }</div>
       <Table
         size='middle'
         loading={fetchCategoriesLoading}
