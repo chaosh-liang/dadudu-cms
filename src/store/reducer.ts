@@ -1,16 +1,12 @@
 import { ActionType } from './action_type';
-
-interface Action {
-  type: string;
-  payload: Record<string, any>
-}
+import type { AnyAction, Reducer } from 'redux';
 
 const initState = { // 初始 state
   field1: '示例字段1',
-  field2: '示例字段2',
+  field2: '示例字段2'
 };
 
-const initialReducer = (state = initState, action: Action) => {
+const initialReducer: Reducer = (state = initState, action: AnyAction) => {
   const { type, payload } = action;
   switch (type) {
     case ActionType.INIT_EXAMPLE_DATA: {

@@ -1,11 +1,11 @@
 
 import type { Store, Reducer  } from 'redux';
 
-export interface InjectStore extends Store {
+export interface DynamicStore extends Store {
   asyncReducers: Record<string, Reducer>
 }
 
-export interface InjectReducer {
+export interface DynamicReducer {
   key: string;
   reducer: Reducer;
 }
