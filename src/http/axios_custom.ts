@@ -1,14 +1,15 @@
 import axios, { AxiosResponse, AxiosInstance } from 'axios';
 
 const TIMEOUT = 10000;
-const BASE_URL = 'http://127.0.0.1:7716';
+const baseURL = process.env.REACT_APP_BASE_URL;
+// console.log('REACT_APP_BASE_URL => ', baseURL);
 
 class CustomAxios {
   private static instance: CustomAxios;
   private axiosInst: AxiosInstance;
 
   private constructor() {
-    this.axiosInst = axios.create({ baseURL: BASE_URL, timeout: TIMEOUT });
+    this.axiosInst = axios.create({ baseURL, timeout: TIMEOUT });
     this.setAxiosInterceptors();
   }
   

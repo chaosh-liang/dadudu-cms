@@ -14,7 +14,7 @@ const initialReducer: Reducer<typeof initState, AnyAction> = (
   state = initState,
   action
 ) => {
-  const { type, payload } = action;
+  const { type, payload = {} } = action;
   switch (type) {
     case ActionType.INIT_EXAMPLE_DATA: {
       const { example } = payload;
