@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { Provider } from 'react-redux'
 import store from 'src/store'
 import Home from 'src/view/home/Home';
@@ -13,7 +13,7 @@ import 'src/assets/scss/antd.override.scss'
 const App = () => {
   return (
     <Provider store={store}>
-      <BrowserRouter>
+      <HashRouter>
         <Switch>
           <Route path='/home' render={(props) => <Home {...props} />} />
           <Route path='/login' render={(props) => <Login {...props} />} />
@@ -21,7 +21,7 @@ const App = () => {
           {/* <Route path="*" render={props => <NoMatch {...props} />} /> */}
           <Redirect to='/home' />
         </Switch>
-      </BrowserRouter>
+      </HashRouter>
     </Provider>
   );
 };
