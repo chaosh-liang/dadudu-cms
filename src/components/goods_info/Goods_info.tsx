@@ -51,7 +51,7 @@ const GoodsInfo: FC<RouteComponentProps> = (props) => {
   const { loading: fetchCategoriesLoading } = useRequest(
     fetchCategories,
     {
-      formatResult({ res }) {
+      formatResult({ data: { res } }) {
         // 格式化接口返回的数据
         // console.log('formatResult => ', res);
         return res.map((item: CategoryT, index: number) => {

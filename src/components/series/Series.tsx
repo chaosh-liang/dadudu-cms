@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC } from 'react';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import { fetchSeries } from 'src/api/categoryAndSeries';
 import { useRequest } from 'ahooks';
@@ -10,7 +10,7 @@ import styles from './Series.module.scss';
 import { formatDate } from 'src/utils';
 
 // 表格列定义
-const columns: ColumnType<any>[] = [
+const columns: ColumnType<SeriesT>[] = [
   {
     title: '序号',
     dataIndex: 'sequence',

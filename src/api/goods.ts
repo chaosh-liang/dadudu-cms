@@ -17,5 +17,5 @@ export const addGoods = (data: GoodsT) => service.postData(ADD_GOODS, data);
 export const editGoods = (data: Partial<GoodsT>) =>
   service.putData(UPDATE_GOODS, data);
 
-export const deleteGoods = (data: { ids: string[] }) =>
+export const deleteGoods = (data: { ids: string[] | React.Key[] }) =>
   service.delData(DELETE_GOODS, { data });

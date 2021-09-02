@@ -1,26 +1,21 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { FC, useState, useEffect } from 'react';
-import http from 'axios';
+import React, { FC, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   Table,
-  Tag,
   Space,
   Button,
   Modal,
-  Image,
-  Upload,
   message,
   Popconfirm,
   Form,
-  Input
+  Input,
 } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import {  ExclamationCircleOutlined } from '@ant-design/icons';
 import type { GoodsT } from 'src/@types/goods';
-import { UploadChangeParam } from 'antd/lib/upload';
 import type { ColumnType } from 'rc-table/lib/interface';
-import { useMount, useRequest } from 'ahooks';
-import { fetchAllGoods } from 'src/api/goods';
+import { useRequest } from 'ahooks';
+import { fetchAllGoods, deleteGoods } from 'src/api/goods';
 import { formatDate } from 'src/utils';
 import styles from './Goods.module.scss';
 
@@ -47,20 +42,19 @@ const Goods: FC<RouteComponentProps> = (props) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState('添加商品');
   const [page_size, setPageSize] = useState(10);
-  // const [tableData, setTableData] = useState([]);
+  const [selectionIds, setSelectionIds] = useState<React.Key[]>([]);
+  const [selectionRows, setSelectionRows] = useState<GoodsT[]>([]);
 
   // 获取所有商品
   const { data, loading: fetchAllGoodsLoading } = useRequest(
     fetchAllGoods.bind(null, { page_index, page_size }),
     {
       refreshDeps: [gt, page_index, page_size],
-      formatResult({ res, total, page_index, page_size }) {
+      formatResult({ data: { res, total, page_index, page_size } }) {
         // 格式化接口返回的数据
         // console.log('formatResult => ', res);
         const goods = res.map((item: GoodsT, index: number) => {
-          const sequence = `0${(page_index - 1) * page_size + index + 1}`.slice(
-            -2
-          ); // 序号
+          const sequence = `0${(page_index - 1) * page_size + index + 1}`.slice(-2); // 序号
           const {
             _id: key,
             home_banner,
@@ -206,13 +200,58 @@ const Goods: FC<RouteComponentProps> = (props) => {
     console.log('editGoods => ', record);
   };
 
-  // 删除
-  const handleDelete = (id: string) => {
-    console.log('handleDelete', id);
+  // 删除：单个
+  const handleDelete = (id?: string) => {
+    // console.log('handleDelete', [id]);
+    id && handleDeleteRequest([id]);
+  };
+
+  // 删除：多个
+  const handleDeleteMulti = () => {
+    // console.log('handleDeleteMulti => ', selectionIds, selectionRows);
+    Modal.confirm({
+      width: 600,
+      title: '删除提示',
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <div>
+          <div>确定删除以下商品吗：</div>
+          <div>
+            {selectionRows.map((item, i) => {
+              if (i === 0) return <a key={item._id}>{item.name}</a>;
+              return <a key={item._id}>、{item.name}</a>;
+            })}
+          </div>
+        </div>
+      ),
+      okText: '确认',
+      cancelText: '取消',
+      onOk() {
+        handleDeleteRequest();
+      },
+    });
+  };
+
+  // 删除：请求
+  const handleDeleteRequest = async (
+    ids: React.Key[] | string[] = selectionIds
+  ) => {
+    // console.log('handleDeleteRequest', ids);
+    try {
+      await deleteGoods({ ids });
+      message.success('删除成功');
+      if (page_index !== 1) { // page-index 或 gt，只要一个更新就可以重新请求数据
+        setPageIndex(1);
+      } else {
+        setGt(gt + 1);
+      }
+    } catch (error) { // 捕获网络故障的错误
+      message.error(error);
+    }
   };
 
   // 表格列定义
-  const columns: ColumnType<any>[] = [
+  const columns: ColumnType<GoodsT>[] = [
     {
       title: '序号',
       dataIndex: 'sequence',
@@ -315,9 +354,9 @@ const Goods: FC<RouteComponentProps> = (props) => {
           </Button>
           <Popconfirm
             title='确定删除?'
-            okText="确认"
-            cancelText="取消"
-            onConfirm={() => handleDelete(record._id ?? '')}
+            okText='确认'
+            cancelText='取消'
+            onConfirm={() => handleDelete(record._id)}
           >
             <Button className={styles['operation-btn']} type='link'>
               删除
@@ -332,9 +371,21 @@ const Goods: FC<RouteComponentProps> = (props) => {
     <div className={styles.container}>
       <header className={styles.header}>
         <h4 className={styles.title}>商品</h4>
-        <Button type='primary' size='middle' onClick={addGoods}>
-          添加商品
-        </Button>
+        <div>
+          {selectionIds.length ? (
+            <Button
+              danger
+              size='middle'
+              style={{ marginRight: '15px' }}
+              onClick={handleDeleteMulti}
+            >
+              删除
+            </Button>
+          ) : null}
+          <Button type='primary' size='middle' onClick={addGoods}>
+            添加
+          </Button>
+        </div>
       </header>
       <section className={styles.section}>
         <Table
@@ -342,6 +393,17 @@ const Goods: FC<RouteComponentProps> = (props) => {
           loading={fetchAllGoodsLoading}
           columns={columns}
           dataSource={data?.goods ?? []}
+          rowSelection={{
+            type: 'checkbox',
+            onChange: (
+              selectedRowKeys: React.Key[],
+              selectedRows: GoodsT[]
+            ) => {
+              // console.log('selectedRowKeys =>', selectedRowKeys);
+              setSelectionIds(selectedRowKeys);
+              setSelectionRows(selectedRows);
+            },
+          }}
           pagination={{
             showSizeChanger: true, // 是否可以改变 pageSize boolean
             // total: 803, // 调试使用
