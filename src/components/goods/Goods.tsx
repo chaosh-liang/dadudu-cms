@@ -1,22 +1,14 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { FC, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import {
-  Table,
-  Space,
-  Button,
-  Modal,
-  message,
-  Popconfirm,
-  Form,
-  Input,
-} from 'antd';
-import {  ExclamationCircleOutlined } from '@ant-design/icons';
+import { Table, Space, Button, Modal, message, Popconfirm } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import type { GoodsT } from 'src/@types/goods';
 import type { ColumnType } from 'rc-table/lib/interface';
 import { useRequest } from 'ahooks';
 import { fetchAllGoods, deleteGoods } from 'src/api/goods';
 import { formatDate } from 'src/utils';
+import AddEditModal from './AddEditModal';
 import styles from './Goods.module.scss';
 
 /* {
@@ -36,11 +28,12 @@ import styles from './Goods.module.scss';
   'banner_url': [{ _id: ObjectId('1234'), path: string }]
 } */
 
-const Goods: FC<RouteComponentProps> = (props) => {
+const Goods: FC<RouteComponentProps> = () => {
   const [gt, setGt] = useState(0); // 为了触发获取商品请求
   const [page_index, setPageIndex] = useState(1);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalTitle, setModalTitle] = useState('添加商品');
+  const [aeMode, setAEMode] = useState(1); // 1：添加，2：编辑
+  const [aeVisible, setAEVisible] = useState(false);
+  const [aeData, setAEData] = useState<GoodsT | null>(null);
   const [page_size, setPageSize] = useState(10);
   const [selectionIds, setSelectionIds] = useState<React.Key[]>([]);
   const [selectionRows, setSelectionRows] = useState<GoodsT[]>([]);
@@ -54,7 +47,9 @@ const Goods: FC<RouteComponentProps> = (props) => {
         // 格式化接口返回的数据
         // console.log('formatResult => ', res);
         const goods = res.map((item: GoodsT, index: number) => {
-          const sequence = `0${(page_index - 1) * page_size + index + 1}`.slice(-2); // 序号
+          const sequence = `0${(page_index - 1) * page_size + index + 1}`.slice(
+            -2
+          ); // 序号
           const {
             _id: key,
             home_banner,
@@ -175,28 +170,23 @@ const Goods: FC<RouteComponentProps> = (props) => {
     console.log('home add goods => ', res);
   }; */
 
-  // 保存：确定
-  const handleSave = () => {
-    console.log('handleSave');
-  };
-
-  // 保存：取消
-  const handleCancel = () => {
-    console.log('handleCancel');
-    setIsModalVisible(false);
+  // 隐藏 modal
+  const hideAEModal = () => {
+    setAEVisible(false);
   };
 
   // 添加
   const addGoods = () => {
-    setModalTitle('添加商品');
-    setIsModalVisible(true);
+    setAEMode(1);
+    setAEVisible(true);
     console.log('addGoods');
   };
 
   // 编辑
   const editGoods = (record: GoodsT) => {
-    setModalTitle('编辑商品');
-    setIsModalVisible(true);
+    setAEMode(2);
+    setAEVisible(true);
+    setAEData(record);
     console.log('editGoods => ', record);
   };
 
@@ -240,12 +230,14 @@ const Goods: FC<RouteComponentProps> = (props) => {
     try {
       await deleteGoods({ ids });
       message.success('删除成功');
-      if (page_index !== 1) { // page-index 或 gt，只要一个更新就可以重新请求数据
+      if (page_index !== 1) {
+        // page-index 或 gt，只要一个更新就可以重新请求数据
         setPageIndex(1);
       } else {
         setGt(gt + 1);
       }
-    } catch (error) { // 捕获网络故障的错误
+    } catch (error: any) {
+      // 捕获网络故障的错误
       message.error(error);
     }
   };
@@ -334,7 +326,7 @@ const Goods: FC<RouteComponentProps> = (props) => {
       title: '描述',
       dataIndex: 'desc',
       key: 'desc',
-      align: 'center',
+      align: 'left',
     },
     {
       title: '操作',
@@ -417,17 +409,12 @@ const Goods: FC<RouteComponentProps> = (props) => {
           }}
         />
       </section>
-      <Modal
-        destroyOnClose
-        title={modalTitle}
-        visible={isModalVisible}
-        onOk={handleSave}
-        onCancel={handleCancel}
-      >
-        <Form>
-          <Input />
-        </Form>
-      </Modal>
+      <AddEditModal
+        mode={aeMode}
+        visible={aeVisible}
+        hideAEModal={hideAEModal}
+        data={aeData}
+      />
       {/*  <br />
       <Upload {...props2}>
         <Button icon={<UploadOutlined />}>Click to Upload</Button>

@@ -1,0 +1,12 @@
+.container {
+  :global {
+    .ant-modal .ant-modal-content .ant-modal-body {
+      max-height: 500px;
+      padding-left: 0;
+      overflow: auto;
+    }
+    .ant-form .ant-form-item .ant-input-number {
+      width: 100%;
+    }
+  }
+}

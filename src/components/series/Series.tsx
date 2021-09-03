@@ -74,7 +74,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
     },
   } = props;
   console.log('series props => ', props);
-  // 获取所有商品
+  // 获取某列别下的所有系列
   const { data, loading } = useRequest(fetchSeries.bind(null, category_id), {
     formatResult({ res }) {
       // 格式化接口返回的数据

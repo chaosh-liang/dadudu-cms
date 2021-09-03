@@ -40,10 +40,10 @@ class CustomAxios {
       // 请求失败
       (error: any) => {
         const { response } = error;
-        if (response) {
+        /* if (response) {
           // 请求已发出，但是不在2xx的范围
           this.errorHandle(response);
-        }
+        } */
         console.error('接口请求出错', error);
         // LoadingInstance.close();
         return Promise.reject(error);
@@ -60,7 +60,7 @@ class CustomAxios {
    * http握手错误
    * @param res  响应回调,根据不同响应进行不同操作
    */
-  private errorHandle(res: any) {
+  /* private errorHandle(res: any) {
     // 状态码判断
     switch (res.status) {
       case 401:
@@ -77,7 +77,7 @@ class CustomAxios {
         console.error('服务器错误');
         break;
     }
-  }
+  } */
 }
 
 // 工厂模式
