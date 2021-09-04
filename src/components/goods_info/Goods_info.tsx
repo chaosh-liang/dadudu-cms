@@ -54,14 +54,19 @@ const GoodsInfo: FC<RouteComponentProps> = (props) => {
     {
       formatResult({ data: { res } }) {
         // 格式化接口返回的数据
+        // 扩展：增加级联组件格式
         // console.log('formatResult => ', res);
         return res.map((item: CategoryT, index: number) => {
-          const { _id: key, series_data, create_time, update_time } = item;
+          const { _id: key, name, series_data, create_time, update_time } = item;
+          series_data.forEach(s => { s.label = s.name; s.value = s._id });
           return {
             ...item,
             key,
             sequence: `0${index + 1}`.slice(-2),
             series_count: series_data.length,
+            label: name,
+            value: key,
+            children: series_data,
             create_time: create_time && formatDate(create_time),
             update_time: update_time && formatDate(update_time),
           };

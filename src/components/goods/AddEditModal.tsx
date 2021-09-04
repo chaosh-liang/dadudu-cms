@@ -1,10 +1,10 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Form, Input, InputNumber, Modal, Radio, Select } from 'antd';
+import { Cascader, Form, Input, InputNumber, Modal, Radio } from 'antd';
 import type { GoodsT } from 'src/@types/goods';
 import type { RootState } from 'src/store/index';
-import type { CategoryT } from 'src/@types/category';
-import type { SeriesT } from 'src/@types/series';
+import { CascaderValueType } from 'antd/lib/cascader';
+import LocalUpload from 'src/components/common/upload/Upload'
 import styles from './AddEditModal.module.scss';
 
 interface LocalProps {
@@ -16,32 +16,21 @@ interface LocalProps {
 
 const AEModal: FC<LocalProps> = (props) => {
   // const [formData] = useState(props.data);
+  const [iconUrl, setIconUrl] = useState('')
 
+  // 类别&系列数据
   const categoryData = useSelector(
     (state: RootState) => state.goodsinfo.category
   );
-  const [seriesData, setSeriesData] = useState<SeriesT[]>([]);
-  const [seriesValue, setSeriesValue] = useState<string>('')
-  // 初始化，会变化，然后赋值
-  useEffect(() => {
-    if (categoryData.length) {
-      setSeriesData(categoryData[0].series_data);
-      setSeriesValue(categoryData[0].series_data[0]?._id ?? '');
-    }
-  }, [categoryData]);
 
-  // 类别改变时
-  const handleCategoryChange = (value: string) => {
-    const curCategory = categoryData.find(
-      (item: CategoryT) => item._id === value
-    );
-    setSeriesData(curCategory.series_data);
-    setSeriesValue(curCategory.series_data[0]?._id);
-    // console.log('handleCategoryChange => ', value, curCategory, seriesData, seriesValue);
-  };
-  // 系列改变时
-  const handleSeriesChange = (value: string) => {
-    console.log('handleSeriesChange => ', value);
+  const uploadIconSuccess = (path: string) => {
+    console.log('uploadIconSuccess => ', path);
+    setIconUrl(path);
+  }
+
+  // 级联选择
+  const onCascaderChange = (value: CascaderValueType) => {
+    console.log('onCascaderChange => ', value);
   };
 
   // 保存：确定
@@ -58,7 +47,7 @@ const AEModal: FC<LocalProps> = (props) => {
   return (
     <div className={styles.container}>
       <Modal
-        width={800}
+        width={900}
         destroyOnClose
         getContainer={false} // 挂载在当前 div 节点下，而不是 document.body
         title={props.mode === 1 ? '添加商品' : '编辑商品'}
@@ -69,7 +58,7 @@ const AEModal: FC<LocalProps> = (props) => {
         onCancel={handleCancel}
       >
         <Form
-          size="small"
+          size='middle'
           labelCol={{ span: 3 }}
           wrapperCol={{ span: 21 }}
           autoComplete='off'
@@ -128,31 +117,19 @@ const AEModal: FC<LocalProps> = (props) => {
               <Radio value={false}>否</Radio>
             </Radio.Group>
           </Form.Item>
-          <Form.Item label='所属类别' name='category_id'>
-            <Select
-              defaultValue={categoryData[0]?.key}
-              style={{ width: 120 }}
-              onChange={handleCategoryChange}
-            >
-              {categoryData.map((c: CategoryT) => (
-                <Select.Option key={c.key} value={c.key}>
-                  {c.name}
-                </Select.Option>
-              ))}
-            </Select>
+          <Form.Item
+            label='类别和系列'
+            name='series_id'
+            rules={[{ required: true, message: '请选择所属类别和所属系列' }]}
+          >
+            <Cascader
+              options={categoryData}
+              onChange={onCascaderChange}
+              placeholder='Please select'
+            />
           </Form.Item>
-          <Form.Item label='所属系列' name='series_id'>
-            <Select
-              value={seriesValue}
-              style={{ width: 120 }}
-              onChange={handleSeriesChange}
-            >
-              {seriesData.map((s: SeriesT) => (
-                <Select.Option key={s._id} value={s._id}>
-                  {s.name}
-                </Select.Option>
-              ))}
-            </Select>
+          <Form.Item label='商品图标' name='icon_url'>
+            <LocalUpload filePath={iconUrl} uploadSuccess={uploadIconSuccess} />
           </Form.Item>
           <Form.Item
             label='商品描述'
