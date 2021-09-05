@@ -1,6 +1,15 @@
 import React, { FC, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Button, Cascader, Form, Input, InputNumber, message, Modal, Radio } from 'antd';
+import {
+  Button,
+  Cascader,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Modal,
+  Radio,
+} from 'antd';
 import type { GoodsT } from 'src/@types/goods';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import type { RootState } from 'src/store/index';
@@ -11,17 +20,90 @@ import styles from './AddEditModal.module.scss';
 interface LocalProps {
   mode: number;
   visible: boolean;
-  hideAEModal: Function;
-  data: GoodsT | null;
+  data?: GoodsT | null;
+  hideAEModal: (...args: any[]) => void;
+}
+
+interface LocalFormData {
+  name: string;
+  price: number;
+  desc: string;
+  discount_price: number;
+  discount_threshold: number;
+  count_unit: string;
+  currency_unit: string;
+  home_banner: boolean;
+  home_display: boolean;
+  cs_cascader: string[];
+  icon_url: string;
+  desc_url: string[];
+  banner_url: string[];
 }
 
 const AEModal: FC<LocalProps> = (props) => {
-  // const [formData] = useState(props.data);
   const [iconUrl, setIconUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState<string[]>(['']);
   const [descUrl, setDescUrl] = useState<string[]>(['']);
 
-  // 类别&系列数据
+  // 表单初始化数据：添加模式
+  const addModeFormData: LocalFormData = {
+    name: '',
+    price: 1,
+    desc: '',
+    discount_price: 1,
+    discount_threshold: 1,
+    count_unit: '',
+    currency_unit: '￥',
+    home_banner: false,
+    home_display: false,
+    cs_cascader: [''],
+    icon_url: '',
+    desc_url: [''],
+    banner_url: [''],
+  };
+
+  // 表单初始化数据：编辑模式
+  const editModeFormData: LocalFormData = { ...addModeFormData }; // 默认值
+  if (props.data) {
+    const {
+      data: {
+        name,
+        price,
+        desc,
+        discount_price,
+        discount_threshold,
+        count_unit,
+        currency_unit,
+        home_banner,
+        home_display,
+        category_id,
+        series_id,
+        icon_url,
+        desc_url,
+        banner_url
+      },
+    } = props;
+    const durl =  desc_url.map(item => item.path);
+    const burl =  banner_url.map(item => item.path);
+    editModeFormData.name = name;
+    editModeFormData.price = price;
+    editModeFormData.desc = desc;
+    editModeFormData.discount_price = discount_price;
+    editModeFormData.discount_threshold = discount_threshold;
+    editModeFormData.count_unit = count_unit;
+    editModeFormData.currency_unit = currency_unit;
+    editModeFormData.home_banner = home_banner;
+    editModeFormData.home_display = home_display;
+    editModeFormData.cs_cascader = [category_id, series_id];
+    editModeFormData.icon_url = icon_url;
+    editModeFormData.desc_url = durl;
+    editModeFormData.banner_url = burl;
+  }
+
+  // 设置初始化数据
+  const terminalFormData = props.mode === 1 ? addModeFormData : editModeFormData;
+
+  // 类别 & 系列数据
   const categoryData = useSelector(
     (state: RootState) => state.goodsinfo.category
   );
@@ -65,7 +147,7 @@ const AEModal: FC<LocalProps> = (props) => {
   };
 
   // 添加描述图片选项
-  const addDescField= () => {
+  const addDescField = () => {
     setDescUrl([...descUrl, '']);
   };
 
@@ -107,10 +189,12 @@ const AEModal: FC<LocalProps> = (props) => {
         onCancel={handleCancel}
       >
         <Form
+          colon={false}
           size='middle'
           labelCol={{ span: 3 }}
           wrapperCol={{ span: 21 }}
           autoComplete='off'
+          initialValues={terminalFormData}
         >
           <Form.Item
             label='商品名称'
@@ -155,20 +239,20 @@ const AEModal: FC<LocalProps> = (props) => {
             <InputNumber />
           </Form.Item>
           <Form.Item label='主页轮播' name='home_banner'>
-            <Radio.Group name='home_banner_radio_group' defaultValue={false}>
+            <Radio.Group name='home_banner_radio_group'>
               <Radio value={true}>是</Radio>
               <Radio value={false}>否</Radio>
             </Radio.Group>
           </Form.Item>
           <Form.Item label='主页显示' name='home_display'>
-            <Radio.Group name='home_display_radio_group' defaultValue={false}>
+            <Radio.Group name='home_display_radio_group'>
               <Radio value={true}>是</Radio>
               <Radio value={false}>否</Radio>
             </Radio.Group>
           </Form.Item>
           <Form.Item
             label='类别系列'
-            name='series_id'
+            name='cs_cascader'
             rules={[{ required: true, message: '请选择所属类别和所属系列' }]}
           >
             <Cascader
@@ -177,18 +261,26 @@ const AEModal: FC<LocalProps> = (props) => {
               placeholder='Please select'
             />
           </Form.Item>
-          <Form.Item label='缩略图' name='icon_url' rules={[{ required: true, message: '请上传一张缩略图' }]}>
+          <Form.Item
+            label='缩略图'
+            name='icon_url'
+            rules={[{ required: true, message: '请上传一张缩略图' }]}
+          >
             <LocalUpload filePath={iconUrl} uploadSuccess={uploadIconSuccess} />
           </Form.Item>
-          <Form.Item label='轮播图片' name='banner_url' rules={[{ required: true, message: '至少上传一张轮播图' }]}>
+          <Form.Item
+            label='轮播图片'
+            name='banner_url'
+            rules={[{ required: true, message: '至少上传一张轮播图' }]}
+          >
             <div className={styles['banner-box']}>
               {bannerUrl.map((url, i) => (
                 <div className={styles['upload-box']} key={`${url}${i}`}>
                   <LocalUpload
                     filePath={url}
                     uploadSuccess={(path) => uploadBannerSuccess(path, i)}
-                  /><MinusCircleOutlined
-                    onClick={() => removeBannerField(i)}/>
+                  />
+                  <MinusCircleOutlined onClick={() => removeBannerField(i)} />
                 </div>
               ))}
 
@@ -211,9 +303,7 @@ const AEModal: FC<LocalProps> = (props) => {
                     uploadSuccess={(path) => uploadDescSuccess(path, i)}
                   />
                   {/* 允许删除所有选项，不需判断 descUrl.length > 1 */}
-                  <MinusCircleOutlined
-                    onClick={() => removeDescField(i)}
-                  />
+                  <MinusCircleOutlined onClick={() => removeDescField(i)} />
                 </div>
               ))}
 

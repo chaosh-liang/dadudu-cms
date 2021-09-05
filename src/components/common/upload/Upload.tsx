@@ -20,11 +20,12 @@ const Upload: FC<LocalProps> = (props) => {
   const pickupFile = () => {
     fileInputEl.current?.click();
   };
+
   // 选取图片
   /* interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
   }
-  用此接口作为类型，报不兼容错误
+  若用此接口作为类型，会报不兼容错误
   */
   const fileChangeEvent = (ev: any) => {
     console.log('fileChangeEvent => ', ev);
