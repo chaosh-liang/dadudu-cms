@@ -1,10 +1,11 @@
 import React, { FC, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Cascader, Form, Input, InputNumber, Modal, Radio } from 'antd';
+import { Button, Cascader, Form, Input, InputNumber, message, Modal, Radio } from 'antd';
 import type { GoodsT } from 'src/@types/goods';
+import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import type { RootState } from 'src/store/index';
 import { CascaderValueType } from 'antd/lib/cascader';
-import LocalUpload from 'src/components/common/upload/Upload'
+import LocalUpload from 'src/components/common/upload/Upload';
 import styles from './AddEditModal.module.scss';
 
 interface LocalProps {
@@ -16,7 +17,9 @@ interface LocalProps {
 
 const AEModal: FC<LocalProps> = (props) => {
   // const [formData] = useState(props.data);
-  const [iconUrl, setIconUrl] = useState('')
+  const [iconUrl, setIconUrl] = useState('');
+  const [bannerUrl, setBannerUrl] = useState<string[]>(['']);
+  const [descUrl, setDescUrl] = useState<string[]>(['']);
 
   // 类别&系列数据
   const categoryData = useSelector(
@@ -26,7 +29,53 @@ const AEModal: FC<LocalProps> = (props) => {
   const uploadIconSuccess = (path: string) => {
     console.log('uploadIconSuccess => ', path);
     setIconUrl(path);
-  }
+  };
+
+  // 描述图片，上传后的回调
+  const uploadBannerSuccess = (path: string, index: number) => {
+    console.log('uploadBannerSuccess => ', path, index);
+    const curBannerUrl = [...bannerUrl];
+    curBannerUrl.splice(index, 1, path);
+    setBannerUrl(curBannerUrl);
+  };
+
+  // 添加描述图片选项
+  const addBannerField = () => {
+    setBannerUrl([...bannerUrl, '']);
+  };
+
+  // 删除描述图片选项
+  const removeBannerField = (index: number) => {
+    // console.log('removeBannerField => ', index);
+    if (index === 0) {
+      message.warning('至少要一张轮播图');
+      return;
+    }
+    const copy = [...bannerUrl];
+    copy.splice(index, 1);
+    setBannerUrl(copy);
+  };
+
+  // 描述图片，上传后的回调
+  const uploadDescSuccess = (path: string, index: number) => {
+    console.log('uploadBannerSuccess => ', path, index);
+    const curBannerUrl = [...bannerUrl];
+    curBannerUrl.splice(index, 1, path);
+    setBannerUrl(curBannerUrl);
+  };
+
+  // 添加描述图片选项
+  const addDescField= () => {
+    setDescUrl([...descUrl, '']);
+  };
+
+  // 删除描述图片选项
+  const removeDescField = (index: number) => {
+    // console.log('removeDescField => ', index);
+    const copy = [...descUrl];
+    copy.splice(index, 1);
+    setDescUrl(copy);
+  };
 
   // 级联选择
   const onCascaderChange = (value: CascaderValueType) => {
@@ -128,8 +177,55 @@ const AEModal: FC<LocalProps> = (props) => {
               placeholder='Please select'
             />
           </Form.Item>
-          <Form.Item label='商品图标' name='icon_url'>
+          <Form.Item label='缩略图' name='icon_url' rules={[{ required: true, message: '请上传一张缩略图' }]}>
             <LocalUpload filePath={iconUrl} uploadSuccess={uploadIconSuccess} />
+          </Form.Item>
+          <Form.Item label='轮播图片' name='banner_url' rules={[{ required: true, message: '至少上传一张轮播图' }]}>
+            <div className={styles['banner-box']}>
+              {bannerUrl.map((url, i) => (
+                <div className={styles['upload-box']} key={`${url}${i}`}>
+                  <LocalUpload
+                    filePath={url}
+                    uploadSuccess={(path) => uploadBannerSuccess(path, i)}
+                  /><MinusCircleOutlined
+                    onClick={() => removeBannerField(i)}/>
+                </div>
+              ))}
+
+              <Button
+                type='dashed'
+                onClick={addBannerField}
+                style={{ width: '50%' }}
+                icon={<PlusOutlined />}
+              >
+                添加轮播图选项
+              </Button>
+            </div>
+          </Form.Item>
+          <Form.Item label='描述图片' name='desc_url'>
+            <div className={styles['descurl-box']}>
+              {descUrl.map((url, i) => (
+                <div className={styles['upload-box']} key={`${url}${i}`}>
+                  <LocalUpload
+                    filePath={url}
+                    uploadSuccess={(path) => uploadDescSuccess(path, i)}
+                  />
+                  {/* 允许删除所有选项，不需判断 descUrl.length > 1 */}
+                  <MinusCircleOutlined
+                    onClick={() => removeDescField(i)}
+                  />
+                </div>
+              ))}
+
+              <Button
+                type='dashed'
+                onClick={addDescField}
+                style={{ width: '50%' }}
+                icon={<PlusOutlined />}
+              >
+                添加描述图选项
+              </Button>
+            </div>
           </Form.Item>
           <Form.Item
             label='商品描述'

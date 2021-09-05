@@ -31,9 +31,9 @@
     }
     .btn-group {
       line-height: 30px;
-      :global(.ant-btn) {
-        &:first-child {
-          margin-right: 10px;
+      :global {
+        .ant-btn + .ant-btn {
+          margin-left: 10px;
         }
       }
     }

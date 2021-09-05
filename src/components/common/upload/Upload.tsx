@@ -2,9 +2,10 @@ import React, { FC, useRef, useState } from 'react';
 import { Button, Input, message } from 'antd';
 import styles from './Upload.module.scss';
 import { upload } from 'src/api/shared';
+import { LocalResponseType } from 'src/@types/shared';
 
 interface LocalProps {
-  filePath: string;
+  filePath?: string;
   labelWidth?: number;
   maxSize?: number;
   labelText?: string;
@@ -42,26 +43,18 @@ const Upload: FC<LocalProps> = (props) => {
     }
   };
   // 上传文件到服务器
-  const uploadFile = () => {
+  const uploadFile = async () => {
     if (file) {
       const formData = new FormData();
       formData.append('picture', file);
 
-      upload(formData)
-        .then((res: any) => {
-          console.log('上传文件 => ', res);
-          // if (res && res.error_code === '00') {
-          //   const imgName = (res.data || {}).filename || '';
-          //   message.success('图片上传成功');
-          //   if (props.uploadSuccess) uploadSuccess(imgName);
-          // }
-        })
-        .catch((reason: any) => {
-          console.log('上传文件错误 => ', reason);
-          message.error('图片上传失败，请检查网络');
-        });
-    } else {
-      message.error('请先选取图片');
+      const result = (await upload(formData)) as LocalResponseType;
+      if (result?.error_code === '00') {
+        const path = result.data?.res ?? '';
+        message.success('图片上传成功');
+        if (props.uploadSuccess) props.uploadSuccess(path);
+        setFile(null);
+      }
     }
   };
   return (
@@ -93,11 +86,13 @@ const Upload: FC<LocalProps> = (props) => {
         </div>
         <div className={styles['btn-group']}>
           <Button type='primary' size='small' onClick={pickupFile}>
-            读取
+            选择图片
           </Button>
-          <Button type='primary' size='small' onClick={uploadFile}>
-            上传服务器
-          </Button>
+          {!!file ? (
+            <Button type='primary' size='small' onClick={uploadFile}>
+              上传服务器
+            </Button>
+          ) : null}
         </div>
       </div>
     </div>
