@@ -6,6 +6,9 @@
       overflow: auto;
     }
     .ant-form .ant-form-item {
+      &:last-of-type {
+        margin-bottom: 0;
+      }
       :local {
         .banner-box,
         .descurl-box {

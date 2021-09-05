@@ -39,8 +39,8 @@ class CustomAxios {
       },
       // 请求失败
       (error: any) => {
-        const { response } = error;
-        /* if (response) {
+        /* const { response } = error;
+        if (response) {
           // 请求已发出，但是不在2xx的范围
           this.errorHandle(response);
         } */

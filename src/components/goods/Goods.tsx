@@ -69,8 +69,8 @@ const Goods: FC<RouteComponentProps> = () => {
             sequence,
             series_name,
             category_name,
-            home_banner: home_banner ? '是' : '否',
-            home_display: home_display ? '是' : '否',
+            is_home_banner: home_banner ? '是' : '否',
+            is_home_display: home_display ? '是' : '否',
             create_time: create_time && formatDate(create_time),
             update_time: update_time && formatDate(update_time),
           };
@@ -300,14 +300,14 @@ const Goods: FC<RouteComponentProps> = () => {
     },
     {
       title: '主页轮播',
-      dataIndex: 'home_banner',
-      key: 'home_banner',
+      dataIndex: 'is_home_banner',
+      key: 'is_home_banner',
       align: 'center',
     },
     {
       title: '主页展示',
-      dataIndex: 'home_display',
-      key: 'home_display',
+      dataIndex: 'is_home_display',
+      key: 'is_home_display',
       align: 'center',
     },
     {

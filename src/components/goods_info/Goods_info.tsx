@@ -21,7 +21,6 @@ import { useDispatch } from 'react-redux';
 import { ActionType } from 'src/store/action_type';
 import store, { injectReducer } from 'src/store';
 import reducer from './reducer';
-import { SeriesT } from 'src/@types/series';
 
 const { Content } = Layout;
 

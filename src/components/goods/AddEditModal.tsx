@@ -48,7 +48,7 @@ const AEModal: FC<LocalProps> = (props) => {
   const removeBannerField = (index: number) => {
     // console.log('removeBannerField => ', index);
     if (index === 0) {
-      message.warning('至少要一张轮播图');
+      message.warning('至少需要一张轮播图');
       return;
     }
     const copy = [...bannerUrl];
@@ -96,7 +96,7 @@ const AEModal: FC<LocalProps> = (props) => {
   return (
     <div className={styles.container}>
       <Modal
-        width={900}
+        width={800}
         destroyOnClose
         getContainer={false} // 挂载在当前 div 节点下，而不是 document.body
         title={props.mode === 1 ? '添加商品' : '编辑商品'}
@@ -167,7 +167,7 @@ const AEModal: FC<LocalProps> = (props) => {
             </Radio.Group>
           </Form.Item>
           <Form.Item
-            label='类别和系列'
+            label='类别系列'
             name='series_id'
             rules={[{ required: true, message: '请选择所属类别和所属系列' }]}
           >
