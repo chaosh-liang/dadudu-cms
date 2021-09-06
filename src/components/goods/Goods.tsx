@@ -177,17 +177,18 @@ const Goods: FC<RouteComponentProps> = () => {
 
   // 添加
   const addGoods = () => {
+    // console.log('addGoods');
     setAEMode(1);
+    setAEData(null);
     setAEVisible(true);
-    console.log('addGoods');
   };
 
   // 编辑
   const editGoods = (record: GoodsT) => {
+    // console.log('editGoods => ', record);
     setAEMode(2);
-    setAEVisible(true);
     setAEData(record);
-    console.log('editGoods => ', record);
+    setAEVisible(true);
   };
 
   // 删除：单个

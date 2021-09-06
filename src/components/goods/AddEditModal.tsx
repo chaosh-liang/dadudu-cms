@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Button,
@@ -20,7 +20,7 @@ import styles from './AddEditModal.module.scss';
 interface LocalProps {
   mode: number;
   visible: boolean;
-  data?: GoodsT | null;
+  data: GoodsT | null;
   hideAEModal: (...args: any[]) => void;
 }
 
@@ -41,122 +41,182 @@ interface LocalFormData {
 }
 
 const AEModal: FC<LocalProps> = (props) => {
-  const [iconUrl, setIconUrl] = useState('');
-  const [bannerUrl, setBannerUrl] = useState<string[]>(['']);
-  const [descUrl, setDescUrl] = useState<string[]>(['']);
+  // const [iconUrl, setIconUrl] = useState('');
+  // const [bannerUrl, setBannerUrl] = useState<string[]>(['']);
+  // const [descUrl, setDescUrl] = useState<string[]>(['']);
 
   // 表单初始化数据：添加模式
-  const addModeFormData: LocalFormData = {
-    name: '',
-    price: 1,
-    desc: '',
-    discount_price: 1,
-    discount_threshold: 1,
-    count_unit: '',
-    currency_unit: '￥',
-    home_banner: false,
-    home_display: false,
-    cs_cascader: [''],
-    icon_url: '',
-    desc_url: [''],
-    banner_url: [''],
-  };
+  const addModeFormData = useMemo<LocalFormData>(
+    () => ({
+      name: '',
+      price: 1,
+      desc: '',
+      discount_price: 1,
+      discount_threshold: 1,
+      count_unit: '',
+      currency_unit: '￥',
+      home_banner: false,
+      home_display: false,
+      cs_cascader: [''],
+      icon_url: '',
+      desc_url: [''],
+      banner_url: [''],
+    }),
+    []
+  );
+
+  // 表单实例，维护表单字段和状态
+  const [form] = Form.useForm();
+  // 表单数据
+  // const [formInitValues] = useState<LocalFormData>(addModeFormData);
+  // form.setFieldsValue(addModeFormData);
 
   // 表单初始化数据：编辑模式
-  const editModeFormData: LocalFormData = { ...addModeFormData }; // 默认值
-  if (props.data) {
-    const {
-      data: {
-        name,
-        price,
-        desc,
-        discount_price,
-        discount_threshold,
-        count_unit,
-        currency_unit,
-        home_banner,
-        home_display,
-        category_id,
-        series_id,
-        icon_url,
-        desc_url,
-        banner_url
-      },
-    } = props;
-    const durl =  desc_url.map(item => item.path);
-    const burl =  banner_url.map(item => item.path);
-    editModeFormData.name = name;
-    editModeFormData.price = price;
-    editModeFormData.desc = desc;
-    editModeFormData.discount_price = discount_price;
-    editModeFormData.discount_threshold = discount_threshold;
-    editModeFormData.count_unit = count_unit;
-    editModeFormData.currency_unit = currency_unit;
-    editModeFormData.home_banner = home_banner;
-    editModeFormData.home_display = home_display;
-    editModeFormData.cs_cascader = [category_id, series_id];
-    editModeFormData.icon_url = icon_url;
-    editModeFormData.desc_url = durl;
-    editModeFormData.banner_url = burl;
-  }
-
-  // 设置初始化数据
-  const terminalFormData = props.mode === 1 ? addModeFormData : editModeFormData;
+  useEffect(() => {
+    console.log('useEffect');
+    if (props.visible) {
+      if (props.mode === 2 && props.data) {
+        console.log('mode === 2');
+        const {
+          name,
+          price,
+          desc,
+          discount_price,
+          discount_threshold,
+          count_unit,
+          currency_unit,
+          home_banner,
+          home_display,
+          category_id,
+          series_id,
+          icon_url,
+          desc_url,
+          banner_url,
+        } = props.data;
+        const editModeFormData: LocalFormData = { ...addModeFormData }; // 默认值
+        const durl = desc_url.map((item) => item.path);
+        const burl = banner_url.map((item) => item.path);
+        editModeFormData.name = name;
+        editModeFormData.price = price;
+        editModeFormData.desc = desc;
+        editModeFormData.discount_price = discount_price;
+        editModeFormData.discount_threshold = discount_threshold;
+        editModeFormData.count_unit = count_unit;
+        editModeFormData.currency_unit = currency_unit;
+        editModeFormData.home_banner = home_banner;
+        editModeFormData.home_display = home_display;
+        editModeFormData.cs_cascader = [category_id, series_id];
+        editModeFormData.icon_url = icon_url;
+        editModeFormData.desc_url = durl;
+        editModeFormData.banner_url = burl;
+        form.setFieldsValue(editModeFormData);
+      } else {
+        console.log('mode === 1');
+        form.setFieldsValue(addModeFormData);
+      }
+    } else {
+      console.log('重置表单');
+      // form.resetFields();
+    }
+    console.log('form -> ', form.getFieldsValue(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.visible, props.mode]);
 
   // 类别 & 系列数据
   const categoryData = useSelector(
     (state: RootState) => state.goodsinfo.category
   );
 
+  // 缩略图，上传后的回调
   const uploadIconSuccess = (path: string) => {
     console.log('uploadIconSuccess => ', path);
-    setIconUrl(path);
+    // setIconUrl(path);
+    // terminalFormData.icon_url = path;
+    form.setFieldsValue({ icon_url: path });
+  };
+
+  // 轮播图片，上传后的回调
+  const uploadBannerSuccess = (path: string, index: number) => {
+    console.log('uploadBannerSuccess => ', path, index);
+    // const { banner_url } = terminalFormData;
+    // if (banner_url[0] === '') {
+    //   terminalFormData.banner_url[0] = path;
+    // } else {
+    //   terminalFormData.banner_url.push(path);
+    // }
+    // const curBannerUrl = [...bannerUrl];
+    // curBannerUrl.splice(index, 1, path);
+    // setBannerUrl(curBannerUrl);
+    const banner_url = [...form.getFieldValue('banner_url')];
+    banner_url.splice(index, 1, path);
+    form.setFieldsValue({ banner_url });
   };
 
   // 描述图片，上传后的回调
-  const uploadBannerSuccess = (path: string, index: number) => {
-    console.log('uploadBannerSuccess => ', path, index);
-    const curBannerUrl = [...bannerUrl];
-    curBannerUrl.splice(index, 1, path);
-    setBannerUrl(curBannerUrl);
+  const uploadDescSuccess = (path: string, index: number) => {
+    console.log('uploadDescSuccess => ', path, index);
+    // const { desc_url } = terminalFormData;
+    // if (desc_url[0] === '') {
+    //   terminalFormData.desc_url[0] = path;
+    // } else {
+    //   terminalFormData.desc_url.push(path);
+    // }
+    // const curBannerUrl = [...bannerUrl];
+    // curBannerUrl.splice(index, 1, path);
+    // setBannerUrl(curBannerUrl);
+    const desc_url = [...form.getFieldValue('desc_url')];
+    desc_url.splice(index, 1, path);
+    form.setFieldsValue({ desc_url });
   };
 
-  // 添加描述图片选项
+  // 添加一项轮播图片
   const addBannerField = () => {
-    setBannerUrl([...bannerUrl, '']);
+    // setBannerUrl([...bannerUrl, '']);
+    // terminalFormData.banner_url.push('')
+    const banner_url = [...form.getFieldValue('banner_url')];
+    banner_url.push('');
+    form.setFieldsValue({ banner_url });
   };
 
-  // 删除描述图片选项
+  // 删除一项轮播图片
   const removeBannerField = (index: number) => {
     // console.log('removeBannerField => ', index);
     if (index === 0) {
       message.warning('至少需要一张轮播图');
       return;
     }
-    const copy = [...bannerUrl];
-    copy.splice(index, 1);
-    setBannerUrl(copy);
+    // const { banner_url } = terminalFormData;
+    // const copy = [...banner_url];
+    // copy.splice(index, 1);
+    // terminalFormData.banner_url = copy;
+    const banner_url = [...form.getFieldValue('banner_url')];
+    banner_url.splice(index, 1);
+    form.setFieldsValue({ banner_url });
   };
 
-  // 描述图片，上传后的回调
-  const uploadDescSuccess = (path: string, index: number) => {
-    console.log('uploadBannerSuccess => ', path, index);
-    const curBannerUrl = [...bannerUrl];
-    curBannerUrl.splice(index, 1, path);
-    setBannerUrl(curBannerUrl);
-  };
-
-  // 添加描述图片选项
+  // 添加一项描述图片
   const addDescField = () => {
-    setDescUrl([...descUrl, '']);
+    // setDescUrl([...descUrl, '']);
+    // terminalFormData.desc_url.push('')
+
+    const desc_url = [...form.getFieldValue('desc_url')];
+    desc_url.push('');
+    form.setFieldsValue({ desc_url });
   };
 
-  // 删除描述图片选项
+  // 删除一项描述图片
   const removeDescField = (index: number) => {
     // console.log('removeDescField => ', index);
-    const copy = [...descUrl];
-    copy.splice(index, 1);
-    setDescUrl(copy);
+    // const copy = [...descUrl];
+    // copy.splice(index, 1);
+    // setDescUrl(copy);
+    // const { desc_url } = terminalFormData;
+    // const copy = [...desc_url];
+    // copy.splice(index, 1);
+    // terminalFormData.desc_url = copy;
+    const desc_url = [...form.getFieldValue('desc_url')];
+    desc_url.splice(index, 1);
+    form.setFieldsValue({ desc_url });
   };
 
   // 级联选择
@@ -189,17 +249,21 @@ const AEModal: FC<LocalProps> = (props) => {
         onCancel={handleCancel}
       >
         <Form
+          form={form}
           colon={false}
           size='middle'
           labelCol={{ span: 3 }}
           wrapperCol={{ span: 21 }}
           autoComplete='off'
-          initialValues={terminalFormData}
+          // initialValues={formInitValues}
         >
           <Form.Item
             label='商品名称'
             name='name'
-            rules={[{ required: true, message: '请输入商品名称' }]}
+            rules={[
+              { required: true, message: '请输入商品名称' },
+              { type: 'string', whitespace: true, message: '不能只输入空格符' },
+            ]}
           >
             <Input />
           </Form.Item>
@@ -208,35 +272,35 @@ const AEModal: FC<LocalProps> = (props) => {
             name='price'
             rules={[{ required: true, message: '请输入商品价格' }]}
           >
-            <InputNumber />
+            <InputNumber min={0.01} />
           </Form.Item>
           <Form.Item
             label='折扣数量'
             name='discount_threshold'
             rules={[{ required: true, message: '到达一定数量后享受折扣价' }]}
           >
-            <InputNumber />
+            <InputNumber min={1} />
           </Form.Item>
           <Form.Item
             label='折后价格'
             name='discount_price'
-            rules={[{ required: true, message: '请输入折扣价' }]}
+            rules={[{ required: true, message: '请输入折后价格' }]}
           >
-            <InputNumber />
+            <InputNumber min={0.01} />
           </Form.Item>
           <Form.Item
             label='数量单位'
             name='count_unit'
             rules={[{ required: true, message: '请输入商品计量单位' }]}
           >
-            <InputNumber />
+            <Input placeholder='个' />
           </Form.Item>
           <Form.Item
             label='货币种类'
             name='currency_unit'
             rules={[{ required: true, message: '请输入商品货币种类' }]}
           >
-            <InputNumber />
+            <Input placeholder='￥、$' />
           </Form.Item>
           <Form.Item label='主页轮播' name='home_banner'>
             <Radio.Group name='home_banner_radio_group'>
@@ -253,7 +317,16 @@ const AEModal: FC<LocalProps> = (props) => {
           <Form.Item
             label='类别系列'
             name='cs_cascader'
-            rules={[{ required: true, message: '请选择所属类别和所属系列' }]}
+            rules={[
+              { required: true, message: '请选择所属类别和所属系列' },
+              () => ({
+                validator(_, value: string[]) {
+                  if (value.length === 2 && value.every((i) => i.trim()))
+                    return Promise.resolve();
+                  return Promise.reject(new Error('必须同时存在类别和系列'));
+                },
+              }),
+            ]}
           >
             <Cascader
               options={categoryData}
@@ -262,11 +335,14 @@ const AEModal: FC<LocalProps> = (props) => {
             />
           </Form.Item>
           <Form.Item
-            label='缩略图'
+            label='缩略图片'
             name='icon_url'
             rules={[{ required: true, message: '请上传一张缩略图' }]}
           >
-            <LocalUpload filePath={iconUrl} uploadSuccess={uploadIconSuccess} />
+            <LocalUpload
+              filePath={form.getFieldValue('icon_url')}
+              uploadSuccess={uploadIconSuccess}
+            />
           </Form.Item>
           <Form.Item
             label='轮播图片'
@@ -274,15 +350,18 @@ const AEModal: FC<LocalProps> = (props) => {
             rules={[{ required: true, message: '至少上传一张轮播图' }]}
           >
             <div className={styles['banner-box']}>
-              {bannerUrl.map((url, i) => (
-                <div className={styles['upload-box']} key={`${url}${i}`}>
-                  <LocalUpload
-                    filePath={url}
-                    uploadSuccess={(path) => uploadBannerSuccess(path, i)}
-                  />
-                  <MinusCircleOutlined onClick={() => removeBannerField(i)} />
-                </div>
-              ))}
+              {console.log(form.getFieldValue('banner_url'))}
+              {form
+                .getFieldValue('banner_url')
+                ?.map((url: string, i: number) => (
+                  <div className={styles['upload-box']} key={`${url}${i}`}>
+                    <LocalUpload
+                      filePath={url}
+                      uploadSuccess={(path) => uploadBannerSuccess(path, i)}
+                    />
+                    <MinusCircleOutlined onClick={() => removeBannerField(i)} />
+                  </div>
+                ))}
 
               <Button
                 type='dashed'
@@ -296,7 +375,7 @@ const AEModal: FC<LocalProps> = (props) => {
           </Form.Item>
           <Form.Item label='描述图片' name='desc_url'>
             <div className={styles['descurl-box']}>
-              {descUrl.map((url, i) => (
+              {form.getFieldValue('desc_url')?.map((url: string, i: number) => (
                 <div className={styles['upload-box']} key={`${url}${i}`}>
                   <LocalUpload
                     filePath={url}
