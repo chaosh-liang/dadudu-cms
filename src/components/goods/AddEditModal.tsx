@@ -68,7 +68,7 @@ const AEModal: FC<LocalProps> = (props) => {
   // 表单实例，维护表单字段和状态
   const [form] = Form.useForm();
   // 表单数据
-  // const [formInitValues] = useState<LocalFormData>(addModeFormData);
+  const [formData, setFormData] = useState<LocalFormData>(addModeFormData);
   // form.setFieldsValue(addModeFormData);
 
   // 表单初始化数据：编辑模式
@@ -109,16 +109,14 @@ const AEModal: FC<LocalProps> = (props) => {
         editModeFormData.icon_url = icon_url;
         editModeFormData.desc_url = durl;
         editModeFormData.banner_url = burl;
-        form.setFieldsValue(editModeFormData);
+        // form.setFieldsValue(editModeFormData);
+        setFormData(editModeFormData);
       } else {
         console.log('mode === 1');
-        form.setFieldsValue(addModeFormData);
+        setFormData(addModeFormData);
+        // form.setFieldsValue(addModeFormData);
       }
-    } else {
-      console.log('重置表单');
-      // form.resetFields();
     }
-    console.log('form -> ', form.getFieldsValue(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.visible, props.mode]);
 
@@ -129,93 +127,71 @@ const AEModal: FC<LocalProps> = (props) => {
 
   // 缩略图，上传后的回调
   const uploadIconSuccess = (path: string) => {
-    console.log('uploadIconSuccess => ', path);
-    // setIconUrl(path);
-    // terminalFormData.icon_url = path;
+    // console.log('uploadIconSuccess => ', path);
+    const newFormData = {...formData, icon_url: path };
+    setFormData(newFormData);
     form.setFieldsValue({ icon_url: path });
   };
 
   // 轮播图片，上传后的回调
   const uploadBannerSuccess = (path: string, index: number) => {
-    console.log('uploadBannerSuccess => ', path, index);
-    // const { banner_url } = terminalFormData;
-    // if (banner_url[0] === '') {
-    //   terminalFormData.banner_url[0] = path;
-    // } else {
-    //   terminalFormData.banner_url.push(path);
-    // }
-    // const curBannerUrl = [...bannerUrl];
-    // curBannerUrl.splice(index, 1, path);
-    // setBannerUrl(curBannerUrl);
-    const banner_url = [...form.getFieldValue('banner_url')];
+    // console.log('uploadBannerSuccess => ', path, index);
+    const banner_url = [...formData.banner_url];
     banner_url.splice(index, 1, path);
+    const newFormData = {...formData, banner_url };
+    setFormData(newFormData);
     form.setFieldsValue({ banner_url });
   };
 
   // 描述图片，上传后的回调
   const uploadDescSuccess = (path: string, index: number) => {
-    console.log('uploadDescSuccess => ', path, index);
-    // const { desc_url } = terminalFormData;
-    // if (desc_url[0] === '') {
-    //   terminalFormData.desc_url[0] = path;
-    // } else {
-    //   terminalFormData.desc_url.push(path);
-    // }
-    // const curBannerUrl = [...bannerUrl];
-    // curBannerUrl.splice(index, 1, path);
-    // setBannerUrl(curBannerUrl);
-    const desc_url = [...form.getFieldValue('desc_url')];
+    // console.log('uploadDescSuccess => ', path, index);
+    const desc_url = [...formData.desc_url];
     desc_url.splice(index, 1, path);
+    const newFormData = {...formData, desc_url };
+    setFormData(newFormData);
     form.setFieldsValue({ desc_url });
   };
 
   // 添加一项轮播图片
   const addBannerField = () => {
-    // setBannerUrl([...bannerUrl, '']);
-    // terminalFormData.banner_url.push('')
-    const banner_url = [...form.getFieldValue('banner_url')];
+    const banner_url = [...formData.banner_url];
     banner_url.push('');
+    const newFormData = {...formData, banner_url };
+    setFormData(newFormData);
     form.setFieldsValue({ banner_url });
   };
 
   // 删除一项轮播图片
   const removeBannerField = (index: number) => {
     // console.log('removeBannerField => ', index);
-    if (index === 0) {
+    const banner_url = [...formData.banner_url];
+    if (banner_url.length <= 1) {
       message.warning('至少需要一张轮播图');
       return;
-    }
-    // const { banner_url } = terminalFormData;
-    // const copy = [...banner_url];
-    // copy.splice(index, 1);
-    // terminalFormData.banner_url = copy;
-    const banner_url = [...form.getFieldValue('banner_url')];
+    };
     banner_url.splice(index, 1);
+    const newFormData = {...formData, banner_url };
+    setFormData(newFormData);
     form.setFieldsValue({ banner_url });
   };
 
   // 添加一项描述图片
   const addDescField = () => {
-    // setDescUrl([...descUrl, '']);
-    // terminalFormData.desc_url.push('')
-
-    const desc_url = [...form.getFieldValue('desc_url')];
+    const desc_url = [...formData.desc_url];
     desc_url.push('');
+    const newFormData = {...formData, desc_url };
+    setFormData(newFormData);
     form.setFieldsValue({ desc_url });
   };
 
   // 删除一项描述图片
   const removeDescField = (index: number) => {
     // console.log('removeDescField => ', index);
-    // const copy = [...descUrl];
-    // copy.splice(index, 1);
-    // setDescUrl(copy);
-    // const { desc_url } = terminalFormData;
-    // const copy = [...desc_url];
-    // copy.splice(index, 1);
-    // terminalFormData.desc_url = copy;
-    const desc_url = [...form.getFieldValue('desc_url')];
+    const desc_url = [...formData.desc_url];
     desc_url.splice(index, 1);
+    const newFormData = {...formData, desc_url };
+    setFormData(newFormData);
     form.setFieldsValue({ desc_url });
   };
 
@@ -227,6 +203,8 @@ const AEModal: FC<LocalProps> = (props) => {
   // 保存：确定
   const handleSave = () => {
     console.log('handleSave');
+    const formData2 = form.getFieldsValue(true);
+    console.log('formData2 => ', formData2);
   };
 
   // 保存：取消
@@ -255,7 +233,7 @@ const AEModal: FC<LocalProps> = (props) => {
           labelCol={{ span: 3 }}
           wrapperCol={{ span: 21 }}
           autoComplete='off'
-          // initialValues={formInitValues}
+          initialValues={formData}
         >
           <Form.Item
             label='商品名称'
@@ -340,7 +318,7 @@ const AEModal: FC<LocalProps> = (props) => {
             rules={[{ required: true, message: '请上传一张缩略图' }]}
           >
             <LocalUpload
-              filePath={form.getFieldValue('icon_url')}
+              filePath={formData.icon_url}
               uploadSuccess={uploadIconSuccess}
             />
           </Form.Item>
@@ -350,10 +328,7 @@ const AEModal: FC<LocalProps> = (props) => {
             rules={[{ required: true, message: '至少上传一张轮播图' }]}
           >
             <div className={styles['banner-box']}>
-              {console.log(form.getFieldValue('banner_url'))}
-              {form
-                .getFieldValue('banner_url')
-                ?.map((url: string, i: number) => (
+              {formData.banner_url.map((url: string, i: number) => (
                   <div className={styles['upload-box']} key={`${url}${i}`}>
                     <LocalUpload
                       filePath={url}
@@ -375,7 +350,7 @@ const AEModal: FC<LocalProps> = (props) => {
           </Form.Item>
           <Form.Item label='描述图片' name='desc_url'>
             <div className={styles['descurl-box']}>
-              {form.getFieldValue('desc_url')?.map((url: string, i: number) => (
+              {formData.desc_url.map((url: string, i: number) => (
                 <div className={styles['upload-box']} key={`${url}${i}`}>
                   <LocalUpload
                     filePath={url}

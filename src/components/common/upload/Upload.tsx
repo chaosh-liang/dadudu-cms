@@ -52,9 +52,11 @@ const Upload: FC<LocalProps> = (props) => {
       const result = (await upload(formData)) as LocalResponseType;
       if (result?.error_code === '00') {
         const path = result.data?.res ?? '';
+        setFile(null);
+        // 先执行组件内的操作(setFile(null))，然后执行父组件操作(callback)
+        // 否则，本组件内无原因自己更新状态，就会警告内存泄漏，而不进行操作 no-op
         message.success('图片上传成功');
         if (props.uploadSuccess) props.uploadSuccess(path);
-        setFile(null);
       }
     }
   };
