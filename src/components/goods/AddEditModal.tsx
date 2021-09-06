@@ -10,10 +10,12 @@ import {
   Modal,
   Radio,
 } from 'antd';
+import isEqual from 'lodash/isEqual';
 import type { GoodsT } from 'src/@types/goods';
+import type { LocalResponseType } from 'src/@types/shared';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import type { RootState } from 'src/store/index';
-import { CascaderValueType } from 'antd/lib/cascader';
+import { addGoods, editGoods } from 'src/api/goods';
 import LocalUpload from 'src/components/common/upload/Upload';
 import styles from './AddEditModal.module.scss';
 
@@ -41,10 +43,6 @@ interface LocalFormData {
 }
 
 const AEModal: FC<LocalProps> = (props) => {
-  // const [iconUrl, setIconUrl] = useState('');
-  // const [bannerUrl, setBannerUrl] = useState<string[]>(['']);
-  // const [descUrl, setDescUrl] = useState<string[]>(['']);
-
   // 表单初始化数据：添加模式
   const addModeFormData = useMemo<LocalFormData>(
     () => ({
@@ -69,14 +67,13 @@ const AEModal: FC<LocalProps> = (props) => {
   const [form] = Form.useForm();
   // 表单数据
   const [formData, setFormData] = useState<LocalFormData>(addModeFormData);
-  // form.setFieldsValue(addModeFormData);
 
   // 表单初始化数据：编辑模式
   useEffect(() => {
     console.log('useEffect');
     if (props.visible) {
       if (props.mode === 2 && props.data) {
-        console.log('mode === 2');
+        // console.log('mode === 2');
         const {
           name,
           price,
@@ -94,8 +91,6 @@ const AEModal: FC<LocalProps> = (props) => {
           banner_url,
         } = props.data;
         const editModeFormData: LocalFormData = { ...addModeFormData }; // 默认值
-        const durl = desc_url.map((item) => item.path);
-        const burl = banner_url.map((item) => item.path);
         editModeFormData.name = name;
         editModeFormData.price = price;
         editModeFormData.desc = desc;
@@ -107,14 +102,14 @@ const AEModal: FC<LocalProps> = (props) => {
         editModeFormData.home_display = home_display;
         editModeFormData.cs_cascader = [category_id, series_id];
         editModeFormData.icon_url = icon_url;
-        editModeFormData.desc_url = durl;
-        editModeFormData.banner_url = burl;
-        // form.setFieldsValue(editModeFormData);
+        editModeFormData.desc_url = desc_url;
+        editModeFormData.banner_url = banner_url;
         setFormData(editModeFormData);
+        form.setFieldsValue(editModeFormData);
       } else {
-        console.log('mode === 1');
+        // console.log('mode === 1');
         setFormData(addModeFormData);
-        // form.setFieldsValue(addModeFormData);
+        form.setFieldsValue(addModeFormData);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,10 +120,18 @@ const AEModal: FC<LocalProps> = (props) => {
     (state: RootState) => state.goodsinfo.category
   );
 
+  /*
+   * !!!@Note
+   * setFieldsValue 不会触发 onFieldsChange 和 onValuesChange
+   * change 事件仅当用户交互才会触发。该设计是为了防止在 change 事件中调用 setFieldsValue 导致的循环问题。
+   * 所以，要实现【缩略图】【轮播图】【描述图】的双向绑定，就需要设置其他对象以实现
+   * 此处，设置的是初始化数据对象 formData 中对应的字段
+   */
+
   // 缩略图，上传后的回调
   const uploadIconSuccess = (path: string) => {
     // console.log('uploadIconSuccess => ', path);
-    const newFormData = {...formData, icon_url: path };
+    const newFormData = { ...formData, icon_url: path };
     setFormData(newFormData);
     form.setFieldsValue({ icon_url: path });
   };
@@ -138,7 +141,7 @@ const AEModal: FC<LocalProps> = (props) => {
     // console.log('uploadBannerSuccess => ', path, index);
     const banner_url = [...formData.banner_url];
     banner_url.splice(index, 1, path);
-    const newFormData = {...formData, banner_url };
+    const newFormData = { ...formData, banner_url };
     setFormData(newFormData);
     form.setFieldsValue({ banner_url });
   };
@@ -148,7 +151,7 @@ const AEModal: FC<LocalProps> = (props) => {
     // console.log('uploadDescSuccess => ', path, index);
     const desc_url = [...formData.desc_url];
     desc_url.splice(index, 1, path);
-    const newFormData = {...formData, desc_url };
+    const newFormData = { ...formData, desc_url };
     setFormData(newFormData);
     form.setFieldsValue({ desc_url });
   };
@@ -157,7 +160,7 @@ const AEModal: FC<LocalProps> = (props) => {
   const addBannerField = () => {
     const banner_url = [...formData.banner_url];
     banner_url.push('');
-    const newFormData = {...formData, banner_url };
+    const newFormData = { ...formData, banner_url };
     setFormData(newFormData);
     form.setFieldsValue({ banner_url });
   };
@@ -169,9 +172,9 @@ const AEModal: FC<LocalProps> = (props) => {
     if (banner_url.length <= 1) {
       message.warning('至少需要一张轮播图');
       return;
-    };
+    }
     banner_url.splice(index, 1);
-    const newFormData = {...formData, banner_url };
+    const newFormData = { ...formData, banner_url };
     setFormData(newFormData);
     form.setFieldsValue({ banner_url });
   };
@@ -180,7 +183,7 @@ const AEModal: FC<LocalProps> = (props) => {
   const addDescField = () => {
     const desc_url = [...formData.desc_url];
     desc_url.push('');
-    const newFormData = {...formData, desc_url };
+    const newFormData = { ...formData, desc_url };
     setFormData(newFormData);
     form.setFieldsValue({ desc_url });
   };
@@ -190,21 +193,52 @@ const AEModal: FC<LocalProps> = (props) => {
     // console.log('removeDescField => ', index);
     const desc_url = [...formData.desc_url];
     desc_url.splice(index, 1);
-    const newFormData = {...formData, desc_url };
+    const newFormData = { ...formData, desc_url };
     setFormData(newFormData);
     form.setFieldsValue({ desc_url });
   };
 
-  // 级联选择
-  const onCascaderChange = (value: CascaderValueType) => {
-    console.log('onCascaderChange => ', value);
-  };
-
   // 保存：确定
   const handleSave = () => {
-    console.log('handleSave');
-    const formData2 = form.getFieldsValue(true);
-    console.log('formData2 => ', formData2);
+    // console.log('handleSave => ', form.getFieldsValue(true));
+    form.validateFields().then(async (values: LocalFormData) => {
+      // console.log('form.validateFields success => ', values);
+      const [category_id, series_id] = values.cs_cascader;
+      const t_values: GoodsT & { cs_cascader?: string[] } = {
+        ...values,
+        category_id,
+        series_id,
+      };
+      if (Reflect.has(t_values, 'cs_cascader'))
+        Reflect.deleteProperty(t_values, 'cs_cascader');
+
+      if (props.mode === 1) {
+        // 添加模式
+        const params_add: GoodsT = t_values;
+        // console.log('params_add => ', params_add);
+        const res = (await addGoods(params_add)) as LocalResponseType;
+        if (res?.error_code === '00') {
+          message.success('添加成功');
+          props.hideAEModal(true);
+        }
+      } else if (props.mode === 2 && props.data) {
+        // 编辑模式，只需要传改动的字段 和 _id
+        const legacy = props.data;
+        const params_edit: Partial<GoodsT> = {};
+        params_edit._id = legacy._id;
+        // console.log('params_edit => ', params_edit);
+        (Reflect.ownKeys(t_values) as string[])
+          .filter((key) => !isEqual(t_values[key], legacy[key]))
+          .forEach((key) => {
+            params_edit[key] = t_values[key];
+          });
+        const res = (await editGoods(params_edit)) as LocalResponseType;
+        if (res?.error_code === '00') {
+          message.success('编辑成功');
+          props.hideAEModal(true);
+        }
+      }
+    });
   };
 
   // 保存：取消
@@ -218,6 +252,7 @@ const AEModal: FC<LocalProps> = (props) => {
       <Modal
         width={800}
         destroyOnClose
+        // forceRender
         getContainer={false} // 挂载在当前 div 节点下，而不是 document.body
         title={props.mode === 1 ? '添加商品' : '编辑商品'}
         okText={props.mode === 1 ? '提交' : '保存'}
@@ -230,12 +265,13 @@ const AEModal: FC<LocalProps> = (props) => {
           form={form}
           colon={false}
           size='middle'
+          autoComplete='off'
           labelCol={{ span: 3 }}
           wrapperCol={{ span: 21 }}
-          autoComplete='off'
           initialValues={formData}
         >
           <Form.Item
+            validateFirst
             label='商品名称'
             name='name'
             rules={[
@@ -246,6 +282,7 @@ const AEModal: FC<LocalProps> = (props) => {
             <Input />
           </Form.Item>
           <Form.Item
+            validateFirst
             label='商品价格'
             name='price'
             rules={[{ required: true, message: '请输入商品价格' }]}
@@ -253,6 +290,7 @@ const AEModal: FC<LocalProps> = (props) => {
             <InputNumber min={0.01} />
           </Form.Item>
           <Form.Item
+            validateFirst
             label='折扣数量'
             name='discount_threshold'
             rules={[{ required: true, message: '到达一定数量后享受折扣价' }]}
@@ -260,6 +298,7 @@ const AEModal: FC<LocalProps> = (props) => {
             <InputNumber min={1} />
           </Form.Item>
           <Form.Item
+            validateFirst
             label='折后价格'
             name='discount_price'
             rules={[{ required: true, message: '请输入折后价格' }]}
@@ -267,6 +306,7 @@ const AEModal: FC<LocalProps> = (props) => {
             <InputNumber min={0.01} />
           </Form.Item>
           <Form.Item
+            validateFirst
             label='数量单位'
             name='count_unit'
             rules={[{ required: true, message: '请输入商品计量单位' }]}
@@ -274,25 +314,27 @@ const AEModal: FC<LocalProps> = (props) => {
             <Input placeholder='个' />
           </Form.Item>
           <Form.Item
+            validateFirst
             label='货币种类'
             name='currency_unit'
             rules={[{ required: true, message: '请输入商品货币种类' }]}
           >
             <Input placeholder='￥、$' />
           </Form.Item>
-          <Form.Item label='主页轮播' name='home_banner'>
+          <Form.Item validateFirst label='主页轮播' name='home_banner'>
             <Radio.Group name='home_banner_radio_group'>
               <Radio value={true}>是</Radio>
               <Radio value={false}>否</Radio>
             </Radio.Group>
           </Form.Item>
-          <Form.Item label='主页显示' name='home_display'>
+          <Form.Item validateFirst label='主页显示' name='home_display'>
             <Radio.Group name='home_display_radio_group'>
               <Radio value={true}>是</Radio>
               <Radio value={false}>否</Radio>
             </Radio.Group>
           </Form.Item>
           <Form.Item
+            validateFirst
             label='类别系列'
             name='cs_cascader'
             rules={[
@@ -308,11 +350,11 @@ const AEModal: FC<LocalProps> = (props) => {
           >
             <Cascader
               options={categoryData}
-              onChange={onCascaderChange}
-              placeholder='Please select'
+              placeholder='请选择商品所属类别和系列'
             />
           </Form.Item>
           <Form.Item
+            validateFirst
             label='缩略图片'
             name='icon_url'
             rules={[{ required: true, message: '请上传一张缩略图' }]}
@@ -323,21 +365,21 @@ const AEModal: FC<LocalProps> = (props) => {
             />
           </Form.Item>
           <Form.Item
+            validateFirst
             label='轮播图片'
             name='banner_url'
             rules={[{ required: true, message: '至少上传一张轮播图' }]}
           >
             <div className={styles['banner-box']}>
               {formData.banner_url.map((url: string, i: number) => (
-                  <div className={styles['upload-box']} key={`${url}${i}`}>
-                    <LocalUpload
-                      filePath={url}
-                      uploadSuccess={(path) => uploadBannerSuccess(path, i)}
-                    />
-                    <MinusCircleOutlined onClick={() => removeBannerField(i)} />
-                  </div>
-                ))}
-
+                <div className={styles['upload-box']} key={`${url}${i}`}>
+                  <LocalUpload
+                    filePath={url}
+                    uploadSuccess={(path) => uploadBannerSuccess(path, i)}
+                  />
+                  <MinusCircleOutlined onClick={() => removeBannerField(i)} />
+                </div>
+              ))}
               <Button
                 type='dashed'
                 onClick={addBannerField}
@@ -348,7 +390,7 @@ const AEModal: FC<LocalProps> = (props) => {
               </Button>
             </div>
           </Form.Item>
-          <Form.Item label='描述图片' name='desc_url'>
+          <Form.Item validateFirst label='描述图片' name='desc_url'>
             <div className={styles['descurl-box']}>
               {formData.desc_url.map((url: string, i: number) => (
                 <div className={styles['upload-box']} key={`${url}${i}`}>
@@ -372,6 +414,7 @@ const AEModal: FC<LocalProps> = (props) => {
             </div>
           </Form.Item>
           <Form.Item
+            validateFirst
             label='商品描述'
             name='desc'
             rules={[{ required: true, message: '请输入商品描述' }]}

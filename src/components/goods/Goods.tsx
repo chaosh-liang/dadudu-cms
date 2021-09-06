@@ -11,22 +11,6 @@ import { formatDate } from 'src/utils';
 import AddEditModal from './AddEditModal';
 import styles from './Goods.module.scss';
 
-/* {
-  'name': 'iphone12',
-  'discount_price':5599.69,
-  'discount_threshold':10,
-  'price':6099.69,
-  'currency_unit': '￥',
-  'count_unit': '个',
-  'home_banner':true,
-  'home_display': true,
-  'desc':'Apple iPhone 12 128G 蓝色 5G 手机 Apple iPhone 12 128G 蓝色 5G 手机',
-  'icon_url':'/assets/images/iphone.jpg',
-  'series_id':{'_id':'ObjectId(60f586450811e699dc39fbc7')},
-  'category_id': {'_id':ObjectId('60f433ca9f5a87b9f4c71941')},
-  'desc_url':[{ _id: ObjectId('1234'), path: string }],
-  'banner_url': [{ _id: ObjectId('1234'), path: string }]
-} */
 
 const Goods: FC<RouteComponentProps> = () => {
   const [gt, setGt] = useState(0); // 为了触发获取商品请求
@@ -122,9 +106,7 @@ const Goods: FC<RouteComponentProps> = () => {
     series_id: '6107f6df614e499df39c6218',
     home_banner: true,
     desc_url: [
-      {
-        path: '/assets/images/detail/detail1.png',
-      },
+      '/assets/images/detail/detail1.png'
     ],
     home_display: true,
     currency_unit: '￥',
@@ -137,14 +119,8 @@ const Goods: FC<RouteComponentProps> = () => {
     name: 'iphone 133',
     series_id: '6107f6df614e499df39c621b',
     desc_url: [
-      {
-        path: '/assets/images/detail/detail1.png',
-        _id: '611149f98f66013b50690381',
-      },
-      {
-        path: '/assets/images/detail/detail2.png',
-        _id: '611149f98f66013b50690382',
-      },
+      '/assets/images/detail/detail1.png',
+      '/assets/images/detail/detail2.png'
     ],
   };
 
@@ -171,8 +147,9 @@ const Goods: FC<RouteComponentProps> = () => {
   }; */
 
   // 隐藏 modal
-  const hideAEModal = () => {
+  const hideAEModal = (refreshData: boolean = false) => {
     setAEVisible(false);
+    if (refreshData) setGt(gt + 1);
   };
 
   // 添加

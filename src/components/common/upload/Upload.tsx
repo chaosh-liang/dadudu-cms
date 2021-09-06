@@ -28,7 +28,7 @@ const Upload: FC<LocalProps> = (props) => {
   若用此接口作为类型，会报不兼容错误
   */
   const fileChangeEvent = (ev: any) => {
-    console.log('fileChangeEvent => ', ev);
+    // console.log('fileChangeEvent => ', ev);
     const imgFile = ev?.target?.files?.[0];
     if (imgFile) {
       const { size, type } = imgFile;
