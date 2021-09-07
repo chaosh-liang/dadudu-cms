@@ -11,6 +11,7 @@ import {
   Form,
   Modal,
   Input,
+  InputNumber,
 } from 'antd';
 import styles from './Category.module.scss';
 import type { RootState } from 'src/store/index';
@@ -46,6 +47,12 @@ const Category: FC<RouteComponentProps> = (props) => {
       align: 'center',
     },
     {
+      title: '排序',
+      dataIndex: 'no',
+      key: 'no',
+      align: 'center',
+    },
+    {
       title: '创建时间',
       dataIndex: 'create_time',
       key: 'create_time',
@@ -72,7 +79,6 @@ const Category: FC<RouteComponentProps> = (props) => {
           <Button className={styles['operation-btn']} type='link' onClick={() => editCategory(record)}>
             编辑
           </Button>
-
           {record.series_count <= 0 ? (
             <Popconfirm
               title='确定删除?'
@@ -98,7 +104,6 @@ const Category: FC<RouteComponentProps> = (props) => {
     name: '',
     desc: '',
     no: 1,
-    icon_url: '',
     series_data: [],
   };
 
@@ -110,8 +115,8 @@ const Category: FC<RouteComponentProps> = (props) => {
   useEffect(() => {
     // console.log('category useEffect');
     if (aecVisible) {
-      const { name, desc } = aecData;
-      form.setFieldsValue({ name, desc });
+      const { name, no, desc } = aecData;
+      form.setFieldsValue({ name, no, desc });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aecVisible])
@@ -189,7 +194,7 @@ const Category: FC<RouteComponentProps> = (props) => {
         />
       </section>
       <Modal
-        width={520}
+        width={600}
         destroyOnClose
         getContainer={false} // 挂载在当前 div 节点下，而不是 document.body
         title={aecMode === 1 ? '添加类别' : '编辑类别'}
@@ -209,22 +214,29 @@ const Category: FC<RouteComponentProps> = (props) => {
         >
           <Form.Item
             validateFirst
-            label='类别名称'
+            label='名称'
             name='name'
             rules={[
-              { required: true, message: '请输入类别名称' },
+              { required: true, message: '请输入名称' },
               { type: 'string', whitespace: true, message: '不能只输入空格符' },
             ]}
           >
-            <Input placeholder='请输入类别名称' />
+            <Input placeholder='请输入名称' />
           </Form.Item>
           <Form.Item
             validateFirst
-            label='类别描述'
-            name='desc'
-            rules={[{ required: true, message: '请输入类别描述' }]}
+            label='排序'
+            name='no'
+            rules={[{ required: true, message: '请输入序号' }]}
           >
-            <Input.TextArea rows={5} placeholder='请输入类别描述' />
+            <InputNumber min={1} />
+          </Form.Item>
+          <Form.Item
+            validateFirst
+            label='描述'
+            name='desc'
+          >
+            <Input.TextArea rows={5} placeholder='请输入描述' />
           </Form.Item>
         </Form>
       </Modal>
