@@ -5,7 +5,7 @@ import './index.css';
 import App from './App';
 
 // 严格模式报此警告："findDOMNode is deprecated in StrictMode" warning
-const TerminalJsx =
+const RenderJSX =
   process.env.NODE_ENV === 'production' ? (
     <React.StrictMode>
       <App />
@@ -15,6 +15,6 @@ const TerminalJsx =
   );
 
 ReactDOM.render(
-  TerminalJsx,
+  RenderJSX,
   document.getElementById('root')
 );

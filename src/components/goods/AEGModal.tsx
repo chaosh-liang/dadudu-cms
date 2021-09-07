@@ -1,3 +1,16 @@
+/*
+ * @Author: Broli
+ * @Email: broli.up.up.up@gmail.com
+ * @Date: 2021-09-03 10:41:33
+ * @LastEditors: Broli
+ * @LastEditTime: 2021-09-07 11:45:04
+ * @Description1: 建议使用 form 实例来维护表单状态
+ * @Description1: 但 setFieldsValue 不会触发 onFieldsChange 和 onValuesChange
+ * @Description1: 所以，想实现表单的双向绑定，还需外部对象辅助，描述参见下文 @Note
+ * @Description2: form 实例绑定了 HTMLElement 之后，才能使用其方法
+ * @Description2: useEffect 中使用 form.setFieldsValue，放在 if (props.visible) {} 判断中，正合适
+ */
+
 import React, { FC, useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import {
@@ -17,7 +30,7 @@ import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import type { RootState } from 'src/store/index';
 import { addGoods, editGoods } from 'src/api/goods';
 import LocalUpload from 'src/components/common/upload/Upload';
-import styles from './AddEditModal.module.scss';
+import styles from './AEGModal.module.scss';
 
 interface LocalProps {
   mode: number;
@@ -42,7 +55,7 @@ interface LocalFormData {
   banner_url: string[];
 }
 
-const AEModal: FC<LocalProps> = (props) => {
+const AEGModal: FC<LocalProps> = (props) => {
   // 表单初始化数据：添加模式
   const addModeFormData = useMemo<LocalFormData>(
     () => ({
@@ -70,7 +83,7 @@ const AEModal: FC<LocalProps> = (props) => {
 
   // 表单初始化数据：编辑模式
   useEffect(() => {
-    console.log('useEffect');
+    // console.log('AddEditModal useEffect');
     if (props.visible) {
       if (props.mode === 2 && props.data) {
         // console.log('mode === 2');
@@ -227,11 +240,16 @@ const AEModal: FC<LocalProps> = (props) => {
         const params_edit: Partial<GoodsT> = {};
         params_edit._id = legacy._id;
         // console.log('params_edit => ', params_edit);
-        (Reflect.ownKeys(t_values) as string[])
-          .filter((key) => !isEqual(t_values[key], legacy[key]))
-          .forEach((key) => {
-            params_edit[key] = t_values[key];
-          });
+        const keys2Params = (Reflect.ownKeys(t_values) as string[]).filter(
+          (key) => !isEqual(t_values[key], legacy[key])
+        );
+        if (keys2Params.length <= 0) {
+          message.warning('没改动，无需保存');
+          return;
+        }
+        keys2Params.forEach((key) => {
+          params_edit[key] = t_values[key];
+        });
         const res = (await editGoods(params_edit)) as LocalResponseType;
         if (res?.error_code === '00') {
           message.success('编辑成功');
@@ -252,7 +270,6 @@ const AEModal: FC<LocalProps> = (props) => {
       <Modal
         width={800}
         destroyOnClose
-        // forceRender
         getContainer={false} // 挂载在当前 div 节点下，而不是 document.body
         title={props.mode === 1 ? '添加商品' : '编辑商品'}
         okText={props.mode === 1 ? '提交' : '保存'}
@@ -279,7 +296,7 @@ const AEModal: FC<LocalProps> = (props) => {
               { type: 'string', whitespace: true, message: '不能只输入空格符' },
             ]}
           >
-            <Input />
+            <Input placeholder='请输入商品名称' />
           </Form.Item>
           <Form.Item
             validateFirst
@@ -419,7 +436,7 @@ const AEModal: FC<LocalProps> = (props) => {
             name='desc'
             rules={[{ required: true, message: '请输入商品描述' }]}
           >
-            <Input.TextArea rows={5} />
+            <Input.TextArea rows={5} placeholder='请输入商品描述' />
           </Form.Item>
         </Form>
       </Modal>
@@ -427,4 +444,4 @@ const AEModal: FC<LocalProps> = (props) => {
   );
 };
 
-export default AEModal;
+export default AEGModal;

@@ -8,16 +8,16 @@ import type { ColumnType } from 'rc-table/lib/interface';
 import { useRequest } from 'ahooks';
 import { fetchAllGoods, deleteGoods } from 'src/api/goods';
 import { formatDate } from 'src/utils';
-import AddEditModal from './AddEditModal';
+import AEGModal from './AEGModal';
 import styles from './Goods.module.scss';
 
 
 const Goods: FC<RouteComponentProps> = () => {
   const [gt, setGt] = useState(0); // 为了触发获取商品请求
   const [page_index, setPageIndex] = useState(1);
-  const [aeMode, setAEMode] = useState(1); // 1：添加，2：编辑
-  const [aeVisible, setAEVisible] = useState(false);
-  const [aeData, setAEData] = useState<GoodsT | null>(null);
+  const [aegMode, setAEGMode] = useState(1); // 1：添加，2：编辑
+  const [aegVisible, setAEGVisible] = useState(false);
+  const [aegData, setAEGData] = useState<GoodsT | null>(null);
   const [page_size, setPageSize] = useState(10);
   const [selectionIds, setSelectionIds] = useState<React.Key[]>([]);
   const [selectionRows, setSelectionRows] = useState<GoodsT[]>([]);
@@ -73,99 +73,31 @@ const Goods: FC<RouteComponentProps> = () => {
     setPageSize(page_size);
   };
 
-  /* // upload params
-  const props2 = {
-    name: 'file',
-    multiple: true,
-    action: 'http://localhost:7031/upload',
-    onChange({ file, fileList }: UploadChangeParam) {
-      const { name, status } = file;
-      if (status === 'done') {
-        message.success(`${name} file uploaded successfully`);
-        console.log('fileList => ', fileList);
-      } else if (status === 'error') {
-        message.error(`${name} file upload failed.`);
-      }
-    },
-  };
-
-  // add params
-  const params: GoodsT = {
-    name: 'iphone13',
-    banner_url: [
-      {
-        path: '/assets/images/banner/rabit.png',
-      },
-    ],
-    category_id: '60f433ca9f5a87b9f4c71941',
-    desc: 'Apple iPhone 13 128G',
-    discount_price: 5599.69,
-    discount_threshold: 10,
-    icon_url: '/assets/images/iphone.jpg',
-    price: 10099.69,
-    series_id: '6107f6df614e499df39c6218',
-    home_banner: true,
-    desc_url: [
-      '/assets/images/detail/detail1.png'
-    ],
-    home_display: true,
-    currency_unit: '￥',
-    count_unit: '个',
-  };
-
-  // edit params
-  const params2 = {
-    _id: '611149f98f66013b50690383',
-    name: 'iphone 133',
-    series_id: '6107f6df614e499df39c621b',
-    desc_url: [
-      '/assets/images/detail/detail1.png',
-      '/assets/images/detail/detail2.png'
-    ],
-  };
-
-  // delete params
-  const params3: { ids: string[] } = {
-    ids: ['611149f98f66013b50690383', '611149f98f66013b50690384'],
-  };
-
-  const deleteGoods = async (data: { ids: string[] }) => {
-    const res = await http.delete('http://127.0.0.1:7716/api/goods/delete', {
-      data,
-    });
-    console.log('home update goods => ', res);
-  };
-
-  const editGoods = async (data: Partial<GoodsT>) => {
-    const res = await http.put('http://127.0.0.1:7716/api/goods/update', data);
-    console.log('home update goods => ', res);
-  };
-
-  const addGoods = async (data: GoodsT) => {
-    const res = await http.post('http://127.0.0.1:7716/api/goods/add', data);
-    console.log('home add goods => ', res);
-  }; */
-
   // 隐藏 modal
   const hideAEModal = (refreshData: boolean = false) => {
-    setAEVisible(false);
+    setAEGVisible(false);
     if (refreshData) setGt(gt + 1);
   };
 
   // 添加
   const addGoods = () => {
     // console.log('addGoods');
-    setAEMode(1);
-    setAEData(null);
-    setAEVisible(true);
+    setAEGMode(1);
+    setAEGData(null);
+    setAEGVisible(true);
+  };
+
+  // TODO: 预览
+  const overviewGoods = (record: GoodsT) => {
+    console.log('overviewGoods');
   };
 
   // 编辑
   const editGoods = (record: GoodsT) => {
     // console.log('editGoods => ', record);
-    setAEMode(2);
-    setAEData(record);
-    setAEVisible(true);
+    setAEGMode(2);
+    setAEGData(record);
+    setAEGVisible(true);
   };
 
   // 删除：单个
@@ -312,7 +244,7 @@ const Goods: FC<RouteComponentProps> = () => {
       align: 'center',
       render: (text: string, record: GoodsT) => (
         <Space size='small'>
-          <Button className={styles['operation-btn']} type='link'>
+          <Button className={styles['operation-btn']} type='link' onClick={() => overviewGoods(record)}>
             预览
           </Button>
           <Button
@@ -387,33 +319,12 @@ const Goods: FC<RouteComponentProps> = () => {
           }}
         />
       </section>
-      <AddEditModal
-        mode={aeMode}
-        visible={aeVisible}
+      <AEGModal
+        mode={aegMode}
+        visible={aegVisible}
         hideAEModal={hideAEModal}
-        data={aeData}
+        data={aegData}
       />
-      {/*  <br />
-      <Upload {...props2}>
-        <Button icon={<UploadOutlined />}>Click to Upload</Button>
-      </Upload>
-      <br />
-      <Image src='http://localhost:7031/upload/bootstrap.png' width={200} />
-      <br />
-      <Button onClick={() => addGoods(params)}>添加商品</Button>
-      <br />
-      <br />
-      <Button onClick={() => editGoods(params2)}>
-        修改商品：611149f98f66013b50690383
-      </Button>
-      <br />
-      <br />
-      <Button onClick={() => deleteGoods(params3)}>
-        删除商品：611149f98f66013b50690383 & 4
-      </Button>
-      <div>{JSON.stringify(goods)}</div>
-      <br />
-      <hr /> */}
     </div>
   );
 };
