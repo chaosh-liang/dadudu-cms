@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import { fetchSeries } from 'src/api/categoryAndSeries';
 import { useRequest } from 'ahooks';
@@ -18,6 +18,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
     icon_url: '',
     goods_count: 0
   };
+  const [gt, setGt] = useState<number>(1);
   const [aesMode, setAESMode] = useState<number>(1);
   const [aesData, setAESData] = useState<SeriesT>(initAesData);
   const [aesVisible, setAESVisible] = useState<boolean>(false);
@@ -93,24 +94,37 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
       params: { id: category_id },
     },
   } = props;
-  /* // 获取某列别下的所有系列
-  const { data, loading } = useRequest(fetchSeries.bind(null, category_id), {
+
+  useEffect(() => {
+    // console.log('category useEffect');
+    if (aesVisible) {
+      const { name, desc } = aesData;
+      form.setFieldsValue({ name, desc });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aesVisible])
+  
+  // 获取某列别下的所有系列【需要重新获取，因 store 下的数据格式没有字段: goods_count】
+  const { data: seriesData, loading: layoutLoading } = useRequest(fetchSeries.bind(null, category_id), {
+    refreshDeps: [gt],
     formatResult({ data: { res } }) {
       // 格式化接口返回的数据
       // console.log('formatResult => ', result);
       return res.map((item: SeriesT, index: string) => {
-        const { _id: key, goods_data, create_time, update_time } = item;
+        const { _id: key, create_time, update_time } = item;
           return {
           ...item,
           key,
           sequence: `0${index + 1}`.slice(-2),
-          goods_count: goods_data?.length ?? 0,
           create_time: create_time && formatDate(create_time),
           update_time: update_time && formatDate(update_time),
         };
       });
     },
-  }); */
+    onSuccess(data) {
+      setAESData(data);
+    }
+  });
 
   // 添加
   const addSeries = () => {
@@ -131,6 +145,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
   // TODO: 保存
   const handleSave = () => {
     console.log('handleSave');
+    setGt(gt + 1);
   };
 
   // 取消
@@ -168,8 +183,9 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
         <Table
           size='middle'
           columns={columns}
-          dataSource={seriesData}
           pagination={false}
+          dataSource={seriesData}
+          loading={layoutLoading}
         />
       </section>
       <Modal

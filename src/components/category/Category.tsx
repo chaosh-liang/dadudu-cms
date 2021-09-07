@@ -184,8 +184,8 @@ const Category: FC<RouteComponentProps> = (props) => {
         <Table
           size='middle'
           columns={columns}
-          dataSource={categoryData}
           pagination={false}
+          dataSource={categoryData}
         />
       </section>
       <Modal
