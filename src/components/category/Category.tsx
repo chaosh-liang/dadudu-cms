@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
+import isEqual from 'lodash/isEqual';
 import type { ColumnType } from 'rc-table/lib/interface';
 import {
   Space,
@@ -16,13 +17,19 @@ import {
 import styles from './Category.module.scss';
 import type { RootState } from 'src/store/index';
 import type { CategoryT } from 'src/@types/category';
+import type { LocalResponseType } from 'src/@types/shared';
+import {
+  addCategory,
+  deleteCategory,
+  editCategory,
+} from 'src/api/categoryAndSeries';
 
 const Category: FC<RouteComponentProps> = (props) => {
   const {
     match: { path },
   } = props;
   // 表格列定义
-  const columns: ColumnType<CategoryT>[] = [
+  const columns: ColumnType<Required<CategoryT>>[] = [
     {
       title: '序号',
       dataIndex: 'sequence',
@@ -74,9 +81,13 @@ const Category: FC<RouteComponentProps> = (props) => {
       title: '操作',
       key: 'action',
       align: 'center',
-      render: (text: string, record: CategoryT) => (
+      render: (text: string, record: Required<CategoryT>) => (
         <Space size='small'>
-          <Button className={styles['operation-btn']} type='link' onClick={() => editCategory(record)}>
+          <Button
+            className={styles['operation-btn']}
+            type='link'
+            onClick={() => handleEditCategory(record)}
+          >
             编辑
           </Button>
           {record.series_count <= 0 ? (
@@ -100,7 +111,7 @@ const Category: FC<RouteComponentProps> = (props) => {
     },
   ];
 
-  const initAecData: CategoryT = {
+  const formData: CategoryT = {
     name: '',
     desc: '',
     no: 1,
@@ -108,7 +119,8 @@ const Category: FC<RouteComponentProps> = (props) => {
   };
 
   const [aecMode, setAECMode] = useState<number>(1);
-  const [aecData, setAECData] = useState<CategoryT>(initAecData);
+  const [aecData, setAECData] = useState<CategoryT>(formData);
+  const [curEditCategory, setCurEditCategory] = useState<CategoryT>(formData);
   const [aecVisible, setAECVisible] = useState<boolean>(false);
   const [form] = Form.useForm();
 
@@ -118,8 +130,8 @@ const Category: FC<RouteComponentProps> = (props) => {
       const { name, no, desc } = aecData;
       form.setFieldsValue({ name, no, desc });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [aecVisible])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aecVisible]);
 
   // 从 store 中获取类别数据
   const categoryData = useSelector((state: RootState) => {
@@ -133,45 +145,90 @@ const Category: FC<RouteComponentProps> = (props) => {
     return category;
   });
 
-  // 添加
-  const addCategory = () => {
-    // console.log('addCategory');
+  // 添加 => 弹框
+  const handleAddCategory = () => {
+    // console.log('handleAddCategory');
     setAECMode(1);
-    setAECData(initAecData);
+    setAECData(formData);
     setAECVisible(true);
   };
 
-  // 编辑
-  const editCategory = (record: CategoryT) => {
-    // console.log('editCategory => ', record);
+  // 编辑 => 弹框
+  const handleEditCategory = (record: Required<CategoryT>) => {
+    // console.log('handleEditCategory => ', record);
     setAECMode(2);
     setAECData(record);
     setAECVisible(true);
+    setCurEditCategory(record);
   };
 
-  // TODO: 保存
+  // 保存
   const handleSave = () => {
-    console.log('handleSave');
+    form
+      .validateFields()
+      .then(async (values: CategoryT) => {
+        // console.log('form.validateFields success => ', values);
+        if (aecMode === 1) {
+          // 添加模式
+          const params_add: CategoryT = values;
+          // console.log('params_add => ', params_add);
+          const res = (await addCategory(params_add)) as LocalResponseType;
+          if (res?.error_code === '00') {
+            message.success('添加成功');
+            setAECVisible(false);
+          } else {
+            message.error(res?.error_msg ?? '');
+          }
+        } else if (aecMode === 2) {
+          // 编辑模式，只需要传改动的字段 和 _id
+          const params_edit: Partial<CategoryT> = {};
+          params_edit._id = curEditCategory._id;
+          // console.log('params_edit => ', params_edit);
+          const keys2Params = (Reflect.ownKeys(values) as string[]).filter(
+            (key) => !isEqual(values[key], curEditCategory[key])
+          );
+          if (keys2Params.length <= 0) {
+            message.warning('没改动，无需保存');
+            return;
+          }
+          keys2Params.forEach((key) => {
+            params_edit[key] = values[key];
+          });
+          const res = (await editCategory(params_edit)) as LocalResponseType;
+          if (res?.error_code === '00') {
+            message.success('编辑成功');
+            setAECVisible(false);
+          } else {
+            message.error(res?.error_msg ?? '');
+          }
+        }
+      })
+      .catch((errorInfo: any) => {
+        console.log('form.validateFields error => ', errorInfo);
+      });
   };
 
   // 取消
   const handleCancel = () => {
-    console.log('handleCancel');
-    setAECData(initAecData);
+    // console.log('handleCancel');
+    setAECData(formData);
     setAECVisible(false);
   };
 
-  // TODO: 删除
-  const handleDelete = async (id?: string) => {
-    // console.log('handleDelete', [id]);
-    if (id) {
-      try {
-        // await deleteCategory({ ids: id });
+  // 删除
+  const handleDelete = async (id: React.Key) => {
+    // console.log('handleDelete', id);
+    try {
+      const res = (await deleteCategory({ id })) as LocalResponseType;
+      if (res?.error_code === '00') {
         message.success('删除成功');
-      } catch (error: any) {
-        // 捕获网络故障的错误
-        message.error(error);
+        // TODO: redux-thunk 获取一次类别数据
+      } else {
+        message.error(res.error_msg ?? '');
       }
+    } catch (error: any) {
+      // 捕获网络故障的错误
+      message.error(error);
     }
   };
 
@@ -180,7 +237,7 @@ const Category: FC<RouteComponentProps> = (props) => {
       <header className={styles.header}>
         <h4 className={styles.title}>类别</h4>
         <div>
-          <Button type='primary' size='middle' onClick={addCategory}>
+          <Button type='primary' size='middle' onClick={handleAddCategory}>
             添加
           </Button>
         </div>
@@ -227,15 +284,24 @@ const Category: FC<RouteComponentProps> = (props) => {
             validateFirst
             label='排序'
             name='no'
-            rules={[{ required: true, message: '请输入序号' }]}
+            rules={[
+              { required: true, message: '请输入序号' },
+              () => ({
+                validator(_, value: number) {
+                  if (
+                    aecMode === 2 ||
+                    categoryData.every((i: CategoryT) => i.no !== value)
+                  ) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('已存在序号'));
+                },
+              }),
+            ]}
           >
             <InputNumber min={1} />
           </Form.Item>
-          <Form.Item
-            validateFirst
-            label='描述'
-            name='desc'
-          >
+          <Form.Item validateFirst label='描述' name='desc'>
             <Input.TextArea rows={5} placeholder='请输入描述' />
           </Form.Item>
         </Form>

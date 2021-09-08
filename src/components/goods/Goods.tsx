@@ -10,6 +10,7 @@ import { fetchAllGoods, deleteGoods } from 'src/api/goods';
 import { formatDate } from 'src/utils';
 import AEGModal from './AEGModal';
 import styles from './Goods.module.scss';
+import type { LocalResponseType } from 'src/@types/shared';
 
 
 const Goods: FC<RouteComponentProps> = () => {
@@ -20,7 +21,7 @@ const Goods: FC<RouteComponentProps> = () => {
   const [aegData, setAEGData] = useState<GoodsT | null>(null);
   const [page_size, setPageSize] = useState(10);
   const [selectionIds, setSelectionIds] = useState<React.Key[]>([]);
-  const [selectionRows, setSelectionRows] = useState<GoodsT[]>([]);
+  const [selectionRows, setSelectionRows] = useState<Required<GoodsT>[]>([]);
 
   // 获取所有商品
   const { data, loading: fetchAllGoodsLoading } = useRequest(
@@ -93,7 +94,7 @@ const Goods: FC<RouteComponentProps> = () => {
   };
 
   // 编辑
-  const editGoods = (record: GoodsT) => {
+  const editGoods = (record: Required<GoodsT>) => {
     // console.log('editGoods => ', record);
     setAEGMode(2);
     setAEGData(record);
@@ -101,9 +102,9 @@ const Goods: FC<RouteComponentProps> = () => {
   };
 
   // 删除：单个
-  const handleDelete = (id?: string) => {
+  const handleDelete = (id: string) => {
     // console.log('handleDelete', [id]);
-    id && handleDeleteRequest([id]);
+    handleDeleteRequest([id]);
   };
 
   // 删除：多个
@@ -138,13 +139,17 @@ const Goods: FC<RouteComponentProps> = () => {
   ) => {
     // console.log('handleDeleteRequest', ids);
     try {
-      await deleteGoods({ ids });
-      message.success('删除成功');
-      if (page_index !== 1) {
-        // page-index 或 gt，只要一个更新就可以重新请求数据
-        setPageIndex(1);
+      const res = (await deleteGoods({ ids })) as LocalResponseType;
+      if (res?.error_code === '00') {
+        message.success('删除成功');
+        if (page_index !== 1) {
+          // page-index 或 gt，只要一个更新就可以重新请求数据
+          setPageIndex(1);
+        } else {
+          setGt(gt + 1);
+        }
       } else {
-        setGt(gt + 1);
+        message.error(res?.error_msg ?? '');
       }
     } catch (error: any) {
       // 捕获网络故障的错误
@@ -153,7 +158,7 @@ const Goods: FC<RouteComponentProps> = () => {
   };
 
   // 表格列定义
-  const columns: ColumnType<GoodsT>[] = [
+  const columns: ColumnType<Required<GoodsT>>[] = [
     {
       title: '序号',
       dataIndex: 'sequence',
@@ -242,7 +247,7 @@ const Goods: FC<RouteComponentProps> = () => {
       title: '操作',
       key: 'action',
       align: 'center',
-      render: (text: string, record: GoodsT) => (
+      render: (text: string, record: Required<GoodsT>) => (
         <Space size='small'>
           <Button className={styles['operation-btn']} type='link' onClick={() => overviewGoods(record)}>
             预览
@@ -299,7 +304,7 @@ const Goods: FC<RouteComponentProps> = () => {
             type: 'checkbox',
             onChange: (
               selectedRowKeys: React.Key[],
-              selectedRows: GoodsT[]
+              selectedRows: Required<GoodsT>[]
             ) => {
               // console.log('selectedRowKeys =>', selectedRowKeys);
               setSelectionIds(selectedRowKeys);

@@ -3,7 +3,7 @@
  * @Email: broli.up.up.up@gmail.com
  * @Date: 2021-09-03 10:41:33
  * @LastEditors: Broli
- * @LastEditTime: 2021-09-07 11:45:04
+ * @LastEditTime: 2021-09-08 12:11:48
  * @Description1: 建议使用 form 实例来维护表单状态
  * @Description1: 但 setFieldsValue 不会触发 onFieldsChange 和 onValuesChange
  * @Description1: 所以，想实现表单的双向绑定，还需外部对象辅助，描述参见下文 @Note
@@ -68,7 +68,7 @@ const AEGModal: FC<LocalProps> = (props) => {
       currency_unit: '￥',
       home_banner: false,
       home_display: false,
-      cs_cascader: [''],
+      cs_cascader: ['', ''],
       icon_url: '',
       desc_url: [''],
       banner_url: [''],
@@ -233,6 +233,8 @@ const AEGModal: FC<LocalProps> = (props) => {
         if (res?.error_code === '00') {
           message.success('添加成功');
           props.hideAEModal(true);
+        } else {
+          message.error(res?.error_msg ?? '');
         }
       } else if (props.mode === 2 && props.data) {
         // 编辑模式，只需要传改动的字段 和 _id
@@ -254,6 +256,8 @@ const AEGModal: FC<LocalProps> = (props) => {
         if (res?.error_code === '00') {
           message.success('编辑成功');
           props.hideAEModal(true);
+        } else {
+          message.error(res?.error_msg ?? '');
         }
       }
     });
@@ -358,8 +362,9 @@ const AEGModal: FC<LocalProps> = (props) => {
               { required: true, message: '请选择所属类别和所属系列' },
               () => ({
                 validator(_, value: string[]) {
-                  if (value.length === 2 && value.every((i) => i.trim()))
+                  if (value.length === 2 && value.every((i) => i.trim())) {
                     return Promise.resolve();
+                  }
                   return Promise.reject(new Error('必须同时存在类别和系列'));
                 },
               }),
