@@ -198,6 +198,7 @@ const Category: FC<RouteComponentProps> = (props) => {
           if (res?.error_code === '00') {
             message.success('编辑成功');
             setAECVisible(false);
+            // TODO: redux-thunk 获取一次类别数据
           } else {
             message.error(res?.error_msg ?? '');
           }

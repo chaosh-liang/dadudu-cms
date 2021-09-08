@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { FC, useEffect, useState } from 'react';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import { fetchSeries } from 'src/api/categoryAndSeries';
+import { addSeries, deleteSeries, editSeries, fetchSeries } from 'src/api/categoryAndSeries';
 import { useRequest } from 'ahooks';
 import type { ColumnType } from 'rc-table/lib/interface';
 import {
@@ -14,14 +14,16 @@ import {
   message,
   Popconfirm,
   InputNumber,
+  Select
 } from 'antd';
 import type { SeriesT } from 'src/@types/series';
 import styles from './Series.module.scss';
 import { formatDate } from 'src/utils';
-import Select from 'rc-select';
+import type { LocalResponseType } from 'src/@types/shared';
+import isEqual from 'lodash/isEqual';
 
 const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
-  const initAesData: SeriesT = {
+  const formData: SeriesT = {
     name: '',
     category_id: '',
     no: 1,
@@ -31,11 +33,12 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
   };
   const [gt, setGt] = useState<number>(1);
   const [aesMode, setAESMode] = useState<number>(1);
-  const [aesData, setAESData] = useState<SeriesT>(initAesData);
+  const [aesData, setAESData] = useState<SeriesT>(formData);
   const [aesVisible, setAESVisible] = useState<boolean>(false);
+  const [curEditSeries, setCurEditSeries] = useState<SeriesT>(formData);
   const [form] = Form.useForm();
   // 表格列定义
-  const columns: ColumnType<SeriesT>[] = [
+  const columns: ColumnType<Required<SeriesT>>[] = [
     {
       title: '序号',
       dataIndex: 'sequence',
@@ -47,7 +50,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
       dataIndex: 'name',
       key: 'name',
       align: 'center',
-      render: (text: string, record: Record<string, any>) => (
+      render: (text: string, record: Required<SeriesT>) => (
         <Link
           title='跳转至商品'
           to={`/home/goods_info/goods?_key=${record._id}`}
@@ -90,12 +93,12 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
       title: '操作',
       key: 'action',
       align: 'center',
-      render: (text: string, record: SeriesT) => (
+      render: (text: string, record: Required<SeriesT>) => (
         <Space size='small'>
           <Button
             className={styles['operation-btn']}
             type='link'
-            onClick={() => editSeries(record)}
+            onClick={() => handleEditSeries(record)}
           >
             编辑
           </Button>
@@ -159,46 +162,93 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
     }
   );
 
-  // 添加
-  const addSeries = () => {
-    // console.log('addSeries');
+  // 添加 => 弹框
+  const handleAddSeries = () => {
+    // console.log('handleAddSeries');
     setAESMode(1);
-    setAESData(initAesData);
+    setAESData(formData);
     setAESVisible(true);
   };
 
-  // 编辑
-  const editSeries = (record: SeriesT) => {
-    // console.log('editSeries => ', record);
+  // 编辑 => 弹框
+  const handleEditSeries = (record: Required<SeriesT>) => {
+    // console.log('handleEditSeries => ', record);
     setAESMode(2);
     setAESData(record);
     setAESVisible(true);
+    setCurEditSeries(record)
   };
 
-  // TODO: 保存
+  // 保存
   const handleSave = () => {
     console.log('handleSave');
-    setGt(gt + 1);
+    form
+      .validateFields()
+      .then(async (values: SeriesT) => {
+        // console.log('form.validateFields success => ', values);
+        if (aesMode === 1) {
+          // 添加模式
+          const params_add: SeriesT = values;
+          // console.log('params_add => ', params_add);
+          const res = (await addSeries(params_add)) as LocalResponseType;
+          if (res?.error_code === '00') {
+            message.success('添加成功');
+            setAESVisible(false);
+            setGt(gt + 1);
+          } else {
+            message.error(res?.error_msg ?? '');
+          }
+        } else if (aesMode === 2) {
+          // 编辑模式，只需要传改动的字段 和 _id
+          const params_edit: Partial<SeriesT> = {};
+          params_edit._id = curEditSeries._id;
+          // console.log('params_edit => ', params_edit);
+          const keys2Params = (Reflect.ownKeys(values) as string[]).filter(
+            (key) => !isEqual(values[key], curEditSeries[key])
+          );
+          if (keys2Params.length <= 0) {
+            message.warning('没改动，无需保存');
+            return;
+          }
+          keys2Params.forEach((key) => {
+            params_edit[key] = values[key];
+          });
+          const res = (await editSeries(params_edit)) as LocalResponseType;
+          if (res?.error_code === '00') {
+            message.success('编辑成功');
+            setAESVisible(false);
+            // TODO: redux-thunk 获取一次类别数据
+          } else {
+            message.error(res?.error_msg ?? '');
+          }
+        }
+      })
+      .catch((errorInfo: any) => {
+        console.log('form.validateFields error => ', errorInfo);
+      });
   };
 
   // 取消
   const handleCancel = () => {
     console.log('handleCancel');
-    setAESData(initAesData);
+    setAESData(formData);
     setAESVisible(false);
   };
 
   // TODO: 删除
-  const handleDelete = async (id?: string) => {
-    // console.log('handleDelete', [id]);
-    if (id) {
-      try {
-        // await deleteCategory({ ids: id });
+  const handleDelete = async (id: React.Key) => {
+    // console.log('handleDelete', id);
+    try {
+      const res = (await deleteSeries({ id })) as LocalResponseType;
+      if (res?.error_code === '00') {
         message.success('删除成功');
-      } catch (error: any) {
-        // 捕获网络故障的错误
-        message.error(error);
+        // TODO: redux-thunk 获取一次类别数据
+      } else {
+        message.error(res.error_msg ?? '');
       }
+    } catch (error: any) {
+      // 捕获网络故障的错误
+      message.error(error);
     }
   };
 
@@ -207,7 +257,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
       <header className={styles.header}>
         <h4 className={styles.title}>系列</h4>
         <div>
-          <Button type='primary' size='middle' onClick={addSeries}>
+          <Button type='primary' size='middle' onClick={handleAddSeries}>
             添加
           </Button>
         </div>
