@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
 import type { ColumnType } from 'rc-table/lib/interface';
@@ -15,14 +15,13 @@ import {
   InputNumber,
 } from 'antd';
 import styles from './Category.module.scss';
-import type { RootState } from 'src/store/index';
 import type { CategoryT } from 'src/@types/category';
-import type { LocalResponseType } from 'src/@types/shared';
 import {
   addCategory,
   deleteCategory,
   editCategory,
 } from 'src/api/categoryAndSeries';
+import { fetchCategoryThunk } from 'src/store/redux_thunk';
 
 const Category: FC<RouteComponentProps> = (props) => {
   const {
@@ -37,12 +36,12 @@ const Category: FC<RouteComponentProps> = (props) => {
       align: 'center',
     },
     {
-      title: '名称',
+      title: '类别名称',
       dataIndex: 'name',
       key: 'name',
       align: 'center',
       render: (text: string, record: Record<string, any>) => (
-        <Link title='跳转至系列' to={`${path}/${record._id}`}>
+        <Link title='跳转至系列' to={`${path}/${record._id}?category_name=${record.name}`}>
           {text}
         </Link>
       ),
@@ -123,6 +122,7 @@ const Category: FC<RouteComponentProps> = (props) => {
   const [curEditCategory, setCurEditCategory] = useState<CategoryT>(formData);
   const [aecVisible, setAECVisible] = useState<boolean>(false);
   const [form] = Form.useForm();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // console.log('category useEffect');
@@ -134,7 +134,7 @@ const Category: FC<RouteComponentProps> = (props) => {
   }, [aecVisible]);
 
   // 从 store 中获取类别数据
-  const categoryData = useSelector((state: RootState) => {
+  const categoryData = useSelector((state: any) => {
     const {
       goodsinfo: { category },
     } = state;
@@ -172,10 +172,12 @@ const Category: FC<RouteComponentProps> = (props) => {
           // 添加模式
           const params_add: CategoryT = values;
           // console.log('params_add => ', params_add);
-          const res = (await addCategory(params_add)) as LocalResponseType;
+          const res = await addCategory(params_add);
           if (res?.error_code === '00') {
             message.success('添加成功');
             setAECVisible(false);
+            // redux-thunk 获取一次类别数据
+            dispatch(fetchCategoryThunk());
           } else {
             message.error(res?.error_msg ?? '');
           }
@@ -194,11 +196,12 @@ const Category: FC<RouteComponentProps> = (props) => {
           keys2Params.forEach((key) => {
             params_edit[key] = values[key];
           });
-          const res = (await editCategory(params_edit)) as LocalResponseType;
+          const res = await editCategory(params_edit);
           if (res?.error_code === '00') {
             message.success('编辑成功');
             setAECVisible(false);
-            // TODO: redux-thunk 获取一次类别数据
+            // redux-thunk 获取一次类别数据
+            dispatch(fetchCategoryThunk());
           } else {
             message.error(res?.error_msg ?? '');
           }
@@ -220,10 +223,11 @@ const Category: FC<RouteComponentProps> = (props) => {
   const handleDelete = async (id: React.Key) => {
     // console.log('handleDelete', id);
     try {
-      const res = (await deleteCategory({ id })) as LocalResponseType;
+      const res = await deleteCategory({ id });
       if (res?.error_code === '00') {
         message.success('删除成功');
-        // TODO: redux-thunk 获取一次类别数据
+        // redux-thunk 获取一次类别数据
+        dispatch(fetchCategoryThunk());
       } else {
         message.error(res.error_msg ?? '');
       }

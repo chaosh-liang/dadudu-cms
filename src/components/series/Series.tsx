@@ -1,8 +1,14 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { FC, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import { addSeries, deleteSeries, editSeries, fetchSeries } from 'src/api/categoryAndSeries';
-import { useRequest } from 'ahooks';
+import {
+  addSeries,
+  deleteSeries,
+  editSeries,
+  fetchSeries,
+} from 'src/api/categoryAndSeries';
+import { useMount, useRequest } from 'ahooks';
 import type { ColumnType } from 'rc-table/lib/interface';
 import {
   Space,
@@ -14,13 +20,13 @@ import {
   message,
   Popconfirm,
   InputNumber,
-  Select
+  Select,
 } from 'antd';
 import type { SeriesT } from 'src/@types/series';
 import styles from './Series.module.scss';
-import { formatDate } from 'src/utils';
-import type { LocalResponseType } from 'src/@types/shared';
+import { formatDate, getQueryString } from 'src/utils';
 import isEqual from 'lodash/isEqual';
+import { fetchCategoryThunk } from 'src/store/redux_thunk';
 
 const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
   const formData: SeriesT = {
@@ -36,7 +42,10 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
   const [aesData, setAESData] = useState<SeriesT>(formData);
   const [aesVisible, setAESVisible] = useState<boolean>(false);
   const [curEditSeries, setCurEditSeries] = useState<SeriesT>(formData);
+  const [categoryName, setCategoryName] = useState<string>('');
   const [form] = Form.useForm();
+  const dispatch = useDispatch();
+
   // 表格列定义
   const columns: ColumnType<Required<SeriesT>>[] = [
     {
@@ -46,7 +55,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
       align: 'center',
     },
     {
-      title: '名称',
+      title: '系列名称',
       dataIndex: 'name',
       key: 'name',
       align: 'center',
@@ -126,7 +135,13 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
     match: {
       params: { id: category_id },
     },
+    location: { search },
   } = props;
+
+  useMount(() => {
+    const { category_name } = getQueryString(search);
+    setCategoryName(category_name);
+  });
 
   useEffect(() => {
     // console.log('category useEffect');
@@ -176,7 +191,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
     setAESMode(2);
     setAESData(record);
     setAESVisible(true);
-    setCurEditSeries(record)
+    setCurEditSeries(record);
   };
 
   // 保存
@@ -190,11 +205,13 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
           // 添加模式
           const params_add: SeriesT = values;
           // console.log('params_add => ', params_add);
-          const res = (await addSeries(params_add)) as LocalResponseType;
+          const res = await addSeries(params_add);
           if (res?.error_code === '00') {
             message.success('添加成功');
             setAESVisible(false);
-            setGt(gt + 1);
+            setGt(gt + 1); // 重新获取一次系列数据
+            // redux-thunk 获取一次类别数据
+            dispatch(fetchCategoryThunk());
           } else {
             message.error(res?.error_msg ?? '');
           }
@@ -213,11 +230,12 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
           keys2Params.forEach((key) => {
             params_edit[key] = values[key];
           });
-          const res = (await editSeries(params_edit)) as LocalResponseType;
+          const res = await editSeries(params_edit);
           if (res?.error_code === '00') {
             message.success('编辑成功');
             setAESVisible(false);
-            // TODO: redux-thunk 获取一次类别数据
+            // redux-thunk 获取一次类别数据
+            dispatch(fetchCategoryThunk());
           } else {
             message.error(res?.error_msg ?? '');
           }
@@ -230,19 +248,21 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
 
   // 取消
   const handleCancel = () => {
-    console.log('handleCancel');
+    // console.log('handleCancel');
     setAESData(formData);
     setAESVisible(false);
   };
 
-  // TODO: 删除
+  // 删除
   const handleDelete = async (id: React.Key) => {
     // console.log('handleDelete', id);
     try {
-      const res = (await deleteSeries({ id })) as LocalResponseType;
+      const res = await deleteSeries({ id });
       if (res?.error_code === '00') {
         message.success('删除成功');
-        // TODO: redux-thunk 获取一次类别数据
+        setGt(gt + 1);
+        // redux-thunk 获取一次类别数据
+        dispatch(fetchCategoryThunk());
       } else {
         message.error(res.error_msg ?? '');
       }
@@ -255,7 +275,10 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h4 className={styles.title}>系列</h4>
+        <h4 className={styles.title}>
+          <span>所属类别：</span>
+          <span style={{ color: '#1890ff' }}>{categoryName}</span>
+        </h4>
         <div>
           <Button type='primary' size='middle' onClick={handleAddSeries}>
             添加

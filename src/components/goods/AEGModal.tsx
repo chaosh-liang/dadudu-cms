@@ -3,7 +3,7 @@
  * @Email: broli.up.up.up@gmail.com
  * @Date: 2021-09-03 10:41:33
  * @LastEditors: Broli
- * @LastEditTime: 2021-09-08 12:11:48
+ * @LastEditTime: 2021-09-09 03:07:27
  * @Description1: 建议使用 form 实例来维护表单状态
  * @Description1: 但 setFieldsValue 不会触发 onFieldsChange 和 onValuesChange
  * @Description1: 所以，想实现表单的双向绑定，还需外部对象辅助，描述参见下文 @Note
@@ -25,9 +25,7 @@ import {
 } from 'antd';
 import isEqual from 'lodash/isEqual';
 import type { GoodsT } from 'src/@types/goods';
-import type { LocalResponseType } from 'src/@types/shared';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
-import type { RootState } from 'src/store/index';
 import { addGoods, editGoods } from 'src/api/goods';
 import LocalUpload from 'src/components/common/upload/Upload';
 import styles from './AEGModal.module.scss';
@@ -130,7 +128,7 @@ const AEGModal: FC<LocalProps> = (props) => {
 
   // 类别 & 系列数据
   const categoryData = useSelector(
-    (state: RootState) => state.goodsinfo.category
+    (state: any) => state.goodsinfo.category
   );
 
   /*
@@ -229,7 +227,7 @@ const AEGModal: FC<LocalProps> = (props) => {
         // 添加模式
         const params_add: GoodsT = t_values;
         // console.log('params_add => ', params_add);
-        const res = (await addGoods(params_add)) as LocalResponseType;
+        const res = await addGoods(params_add);
         if (res?.error_code === '00') {
           message.success('添加成功');
           props.hideAEModal(true);
@@ -252,7 +250,7 @@ const AEGModal: FC<LocalProps> = (props) => {
         keys2Params.forEach((key) => {
           params_edit[key] = t_values[key];
         });
-        const res = (await editGoods(params_edit)) as LocalResponseType;
+        const res = await editGoods(params_edit);
         if (res?.error_code === '00') {
           message.success('编辑成功');
           props.hideAEModal(true);
@@ -265,7 +263,7 @@ const AEGModal: FC<LocalProps> = (props) => {
 
   // 保存：取消
   const handleCancel = () => {
-    console.log('handleCancel');
+    // console.log('handleCancel');
     props.hideAEModal();
   };
 

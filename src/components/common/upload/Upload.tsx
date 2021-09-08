@@ -2,7 +2,6 @@ import React, { FC, useRef, useState } from 'react';
 import { Button, Input, message } from 'antd';
 import styles from './Upload.module.scss';
 import { upload } from 'src/api/shared';
-import { LocalResponseType } from 'src/@types/shared';
 
 interface LocalProps {
   filePath?: string;
@@ -49,7 +48,7 @@ const Upload: FC<LocalProps> = (props) => {
       const formData = new FormData();
       formData.append('picture', file);
 
-      const result = (await upload(formData)) as LocalResponseType;
+      const result = await upload(formData);
       if (result?.error_code === '00') {
         const path = result.data?.res ?? '';
         setFile(null);

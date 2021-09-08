@@ -1,4 +1,5 @@
 import createAxios from './axios_custom';
+import type { LocalResponseType } from 'src/@types/shared';
 export default class Service {
   private axios: any;
 
@@ -21,7 +22,7 @@ export default class Service {
   }
 
   public getData(url: string, params?: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise<LocalResponseType>((resolve, reject) => {
       this.axios
         .get(url, params)
         .then((res: any) => {
@@ -34,7 +35,7 @@ export default class Service {
   }
 
   public postData(url: string, params: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise<LocalResponseType>((resolve, reject) => {
       this.axios
         .post(url, params)
         .then((res: any) => {
@@ -47,7 +48,7 @@ export default class Service {
   }
 
   public putData(url: string, params: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise<LocalResponseType>((resolve, reject) => {
       this.axios
         .put(url, params)
         .then((res: any) => {
@@ -60,7 +61,7 @@ export default class Service {
   }
 
   public delData(url: string, params: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise<LocalResponseType>((resolve, reject) => {
       this.axios
         .delete(url, params)
         .then((res: any) => {

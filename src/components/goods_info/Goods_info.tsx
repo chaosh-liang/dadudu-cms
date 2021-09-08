@@ -13,14 +13,10 @@ import Goods from 'src/components/goods/Goods';
 import Category from 'src/components/category/Category';
 import Series from 'src/components/series/Series';
 import styles from './Goods_info.module.scss';
-import { fetchCategories } from 'src/api/categoryAndSeries';
-import { useRequest } from 'ahooks';
-import type { CategoryT } from 'src/@types/category';
-import { formatDate } from 'src/utils';
 import { useDispatch } from 'react-redux';
-import { ActionType } from 'src/store/action_type';
 import store, { injectReducer } from 'src/store';
 import reducer from './reducer';
+import { fetchCategoryThunk } from 'src/store/redux_thunk';
 
 const { Content } = Layout;
 
@@ -45,42 +41,16 @@ const GoodsInfo: FC<RouteComponentProps> = (props) => {
     match: { path },
   } = props;
   const [contentvh, setContentvh] = useState(600); // 计算高度
+  const [layoutLoading, setLayoutLoading] = useState(true);
   const dispatch = useDispatch();
-
-  // 获取所有商品
-  const { loading: fetchCategoriesLoading } = useRequest(
-    fetchCategories,
-    {
-      formatResult({ data: { res } }) {
-        // 格式化接口返回的数据
-        // 扩展：增加级联组件格式
-        // console.log('formatResult => ', res);
-        return res.map((item: CategoryT, index: number) => {
-          const { _id: key, name, series_data, create_time, update_time } = item;
-          series_data.forEach(s => { s.label = s.name; s.value = s._id });
-          return {
-            ...item,
-            key,
-            sequence: `0${index + 1}`.slice(-2),
-            series_count: series_data.length,
-            label: name,
-            value: key,
-            children: series_data,
-            create_time: create_time && formatDate(create_time),
-            update_time: update_time && formatDate(update_time),
-          };
-        });
-      },
-      onSuccess(data) {
-        // console.log('Goods_info.tsx fetch category ', data);
-        dispatch({ type: ActionType.SET_CATEGORY_DATA, payload: { data } });
-      }
-    }
-  );
 
   useMount(() => {
     const rootEl = document.getElementById('root');
     if (rootEl) setContentvh(rootEl?.offsetHeight - 64);
+    // 获取所有类别
+    (dispatch(fetchCategoryThunk()) as any).then((data: any) => {
+      setLayoutLoading(false);
+    });
   });
 
   // 获取类别和系列
@@ -96,9 +66,7 @@ const GoodsInfo: FC<RouteComponentProps> = (props) => {
         })}
       </Menu>
       <Content style={{ minHeight: `${contentvh}px` }}>
-        {fetchCategoriesLoading ? (
-          <Spin />
-        ) : (
+        <Spin spinning={layoutLoading}>
           <Switch>
             <Route
               exact
@@ -117,7 +85,7 @@ const GoodsInfo: FC<RouteComponentProps> = (props) => {
             />
             <Redirect to={`${path}/goods`} />
           </Switch>
-        )}
+        </Spin>
       </Content>
     </div>
   );

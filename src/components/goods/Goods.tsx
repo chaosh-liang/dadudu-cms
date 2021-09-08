@@ -10,8 +10,6 @@ import { fetchAllGoods, deleteGoods } from 'src/api/goods';
 import { formatDate } from 'src/utils';
 import AEGModal from './AEGModal';
 import styles from './Goods.module.scss';
-import type { LocalResponseType } from 'src/@types/shared';
-
 
 const Goods: FC<RouteComponentProps> = () => {
   const [gt, setGt] = useState(0); // 为了触发获取商品请求
@@ -139,7 +137,7 @@ const Goods: FC<RouteComponentProps> = () => {
   ) => {
     // console.log('handleDeleteRequest', ids);
     try {
-      const res = (await deleteGoods({ ids })) as LocalResponseType;
+      const res = await deleteGoods({ ids });
       if (res?.error_code === '00') {
         message.success('删除成功');
         if (page_index !== 1) {
@@ -166,7 +164,7 @@ const Goods: FC<RouteComponentProps> = () => {
       align: 'center',
     },
     {
-      title: '名称',
+      title: '商品名称',
       dataIndex: 'name',
       key: 'name',
       align: 'center',
