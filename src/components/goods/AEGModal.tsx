@@ -3,7 +3,7 @@
  * @Email: broli.up.up.up@gmail.com
  * @Date: 2021-09-03 10:41:33
  * @LastEditors: Broli
- * @LastEditTime: 2021-09-09 03:07:27
+ * @LastEditTime: 2021-09-09 16:16:53
  * @Description1: 建议使用 form 实例来维护表单状态
  * @Description1: 但 setFieldsValue 不会触发 onFieldsChange 和 onValuesChange
  * @Description1: 所以，想实现表单的双向绑定，还需外部对象辅助，描述参见下文 @Note
@@ -34,7 +34,7 @@ interface LocalProps {
   mode: number;
   visible: boolean;
   data: GoodsT | null;
-  hideAEModal: (...args: any[]) => void;
+  hideAEModal: (...args: any[]) => any;
 }
 
 interface LocalFormData {
@@ -127,9 +127,7 @@ const AEGModal: FC<LocalProps> = (props) => {
   }, [props.visible, props.mode]);
 
   // 类别 & 系列数据
-  const categoryData = useSelector(
-    (state: any) => state.goodsinfo.category
-  );
+  const categoryData = useSelector((state: any) => state.goodsinfo.category);
 
   /*
    * !!!@Note
@@ -220,8 +218,24 @@ const AEGModal: FC<LocalProps> = (props) => {
         category_id,
         series_id,
       };
-      if (Reflect.has(t_values, 'cs_cascader'))
+      const { banner_url, desc_url } = t_values;
+      // 最后选取的图片，如果未上传服务器，则对应的字段会变为系统路径字符串（如: C\Users\a.png）
+      if (!(Array.isArray(banner_url) && Array.isArray(desc_url))) {
+        message.error('轮播图或描述图，最后选取的图片未上传，请先上传服务器');
+        return;
+      }
+      const banner_url_filter = banner_url.filter((path: string) => path); // 过滤轮播图为空的项
+      const desc_url_filter = desc_url.filter((path: string) => path); // 过滤描述图为空的项
+      if (!banner_url_filter.length) {
+        message.error('至少上传一张轮播图');
+        return;
+      }
+      if (Reflect.has(t_values, 'cs_cascader')) { // 删除级联字段
         Reflect.deleteProperty(t_values, 'cs_cascader');
+      }
+
+      t_values.banner_url = banner_url_filter; // 设置过滤空项后的值
+      t_values.desc_url = desc_url_filter; // 设置过滤空项后的值
 
       if (props.mode === 1) {
         // 添加模式

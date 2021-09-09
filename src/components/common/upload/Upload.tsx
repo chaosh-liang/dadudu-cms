@@ -1,19 +1,20 @@
 import React, { FC, useRef, useState } from 'react';
 import { Button, Input, message } from 'antd';
+import { CloudUploadOutlined } from '@ant-design/icons';
 import styles from './Upload.module.scss';
 import { upload } from 'src/api/shared';
-
 interface LocalProps {
   filePath?: string;
   labelWidth?: number;
   maxSize?: number;
   labelText?: string;
-  uploadSuccess?: (...args: any[]) => void;
+  uploadSuccess?: (...args: any[]) => any;
 }
 
 const Upload: FC<LocalProps> = (props) => {
   const fileInputEl = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
 
   // 触发-选取图片
   const pickupFile = () => {
@@ -47,8 +48,10 @@ const Upload: FC<LocalProps> = (props) => {
     if (file) {
       const formData = new FormData();
       formData.append('picture', file);
+      setUploadLoading(true);
 
       const result = await upload(formData);
+      setUploadLoading(false);
       if (result?.error_code === '00') {
         const path = result.data?.res ?? '';
         setFile(null);
@@ -91,7 +94,13 @@ const Upload: FC<LocalProps> = (props) => {
             选择图片
           </Button>
           {!!file ? (
-            <Button type='primary' size='small' onClick={uploadFile}>
+            <Button
+              type='primary'
+              size='small'
+              icon={<CloudUploadOutlined />}
+              loading={uploadLoading}
+              onClick={uploadFile}
+            >
               上传服务器
             </Button>
           ) : null}
