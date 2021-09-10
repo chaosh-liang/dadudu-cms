@@ -41,7 +41,7 @@ const Category: FC<RouteComponentProps> = (props) => {
       key: 'name',
       align: 'center',
       render: (text: string, record: Record<string, any>) => (
-        <Link title='跳转至系列' to={`${path}/${record._id}?category_name=${record.name}`}>
+        <Link title='跳转至系列' to={`${path}/${record._id}`}>
           {text}
         </Link>
       ),

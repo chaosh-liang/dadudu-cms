@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { FC, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import {
   addSeries,
@@ -8,7 +8,7 @@ import {
   editSeries,
   fetchSeries,
 } from 'src/api/categoryAndSeries';
-import { useMount, useRequest } from 'ahooks';
+import { useRequest } from 'ahooks';
 import type { ColumnType } from 'rc-table/lib/interface';
 import {
   Space,
@@ -22,27 +22,35 @@ import {
   InputNumber,
   Select,
 } from 'antd';
+import type { CategoryT } from 'src/@types/category';
 import type { SeriesT } from 'src/@types/series';
 import styles from './Series.module.scss';
-import { formatDate, getQueryString } from 'src/utils';
+import { formatDate } from 'src/utils';
 import isEqual from 'lodash/isEqual';
 import { fetchCategoryThunk } from 'src/store/redux_thunk';
+import LocalUpload from 'src/components/common/upload/Upload';
 
 const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
+  const {
+    match: {
+      params: { id: category_id },
+    },
+  } = props;
+
   const formData: SeriesT = {
     name: '',
-    category_id: '',
+    category_id,
     no: 1,
     desc: '',
     icon_url: '',
     goods_count: 0,
   };
+
   const [gt, setGt] = useState<number>(1);
   const [aesMode, setAESMode] = useState<number>(1);
   const [aesData, setAESData] = useState<SeriesT>(formData);
   const [aesVisible, setAESVisible] = useState<boolean>(false);
   const [curEditSeries, setCurEditSeries] = useState<SeriesT>(formData);
-  const [categoryName, setCategoryName] = useState<string>('');
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
@@ -131,23 +139,13 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
       ),
     },
   ];
-  const {
-    match: {
-      params: { id: category_id },
-    },
-    location: { search },
-  } = props;
 
-  useMount(() => {
-    const { category_name } = getQueryString(search);
-    setCategoryName(category_name);
-  });
+  const categoryData = useSelector((state: any) => state.goodsinfo.category);
 
   useEffect(() => {
-    // console.log('category useEffect');
+    // console.log('series useEffect');
     if (aesVisible) {
-      const { name, no, desc } = aesData;
-      form.setFieldsValue({ name, no, desc });
+      form.setFieldsValue({ ...aesData });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aesVisible]);
@@ -170,10 +168,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
             update_time: update_time && formatDate(update_time),
           };
         });
-      },
-      onSuccess(data) {
-        setAESData(data);
-      },
+      }
     }
   );
 
@@ -194,9 +189,16 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
     setCurEditSeries(record);
   };
 
+  // 缩略图，上传后的回调
+  const uploadIconSuccess = (path: string) => {
+    // console.log('uploadIconSuccess => ', path);
+    setAESData({ ...aesData, icon_url: path });
+    form.setFieldsValue({ icon_url: path });
+  };
+
   // 保存
   const handleSave = () => {
-    console.log('handleSave');
+    // console.log('handleSave');
     form
       .validateFields()
       .then(async (values: SeriesT) => {
@@ -277,7 +279,11 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
       <header className={styles.header}>
         <h4 className={styles.title}>
           <span>所属类别：</span>
-          <span style={{ color: '#1890ff' }}>{categoryName}</span>
+          <span style={{ color: '#1890ff' }}>
+            {categoryData.find(
+              (category: CategoryT) => category._id === category_id
+            )?.name ?? '--'}
+          </span>
         </h4>
         <div>
           <Button type='primary' size='middle' onClick={handleAddSeries}>
@@ -312,6 +318,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
           autoComplete='off'
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 20 }}
+          initialValues={aesData}
         >
           <Form.Item
             validateFirst
@@ -324,9 +331,6 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
           >
             <Input placeholder='请输入名称' />
           </Form.Item>
-          <Form.Item validateFirst label='所属类别' name='category'>
-            <Select></Select>
-          </Form.Item>
           <Form.Item
             validateFirst
             label='排序'
@@ -334,6 +338,26 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
             rules={[{ required: true, message: '请输入序号' }]}
           >
             <InputNumber min={1} />
+          </Form.Item>
+          <Form.Item validateFirst label='类别' name='category_id'>
+            <Select>
+              {categoryData.map((c: CategoryT) => (
+                <Select.Option value={c._id ?? ''} key={c._id}>
+                  {c.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            validateFirst
+            label='图标'
+            name='icon_url'
+            rules={[{ required: true, message: '请上传一张缩略图' }]}
+          >
+            <LocalUpload
+              filePath={aesData.icon_url}
+              uploadSuccess={uploadIconSuccess}
+            />
           </Form.Item>
           <Form.Item validateFirst label='描述' name='desc'>
             <Input.TextArea rows={5} placeholder='请输入描述' />
