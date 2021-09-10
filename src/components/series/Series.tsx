@@ -30,6 +30,13 @@ import isEqual from 'lodash/isEqual';
 import { fetchCategoryThunk } from 'src/store/redux_thunk';
 import LocalUpload from 'src/components/common/upload/Upload';
 
+type SeriesTable = SeriesT & {
+  key: string;
+  sequence: string;
+  create_time: string;
+  update_time: string;
+};
+
 const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
   const {
     match: {
@@ -46,16 +53,33 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
     goods_count: 0,
   };
 
+  const initSeriesData = [
+    {
+      _id: 'id',
+      key: 'id',
+      name: '',
+      category_id,
+      no: 1,
+      desc: '',
+      icon_url: '',
+      goods_count: 0,
+      sequence: '01',
+      create_time: '2021-09-10 18:31:49',
+      update_time: '2021-09-10 18:31:49',
+    },
+  ];
+
   const [gt, setGt] = useState<number>(1);
   const [aesMode, setAESMode] = useState<number>(1);
   const [aesData, setAESData] = useState<SeriesT>(formData);
   const [aesVisible, setAESVisible] = useState<boolean>(false);
   const [curEditSeries, setCurEditSeries] = useState<SeriesT>(formData);
+  const [seriesData, setseriesData] = useState<SeriesTable[]>(initSeriesData);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
   // 表格列定义
-  const columns: ColumnType<Required<SeriesT>>[] = [
+  const columns: ColumnType<Required<SeriesTable>>[] = [
     {
       title: '序号',
       dataIndex: 'sequence',
@@ -151,7 +175,10 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
   }, [aesVisible]);
 
   // 获取某列别下的所有系列【需要重新获取，因 store 下的数据格式没有字段: goods_count】
-  const { data: seriesData, loading: layoutLoading } = useRequest(
+  const {
+    data: tableData,
+    loading: layoutLoading,
+  }: { data: Required<SeriesTable>[]; loading: boolean } = useRequest(
     fetchSeries.bind(null, category_id),
     {
       refreshDeps: [gt],
@@ -168,7 +195,10 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
             update_time: update_time && formatDate(update_time),
           };
         });
-      }
+      },
+      onSuccess(data: SeriesTable[]) {
+        setseriesData(data)
+      },
     }
   );
 
@@ -296,7 +326,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
           size='middle'
           columns={columns}
           pagination={false}
-          dataSource={seriesData}
+          dataSource={tableData}
           loading={layoutLoading}
         />
       </section>
@@ -335,7 +365,20 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
             validateFirst
             label='排序'
             name='no'
-            rules={[{ required: true, message: '请输入序号' }]}
+            rules={[
+              { required: true, message: '请输入序号' },
+              () => ({
+                validator(_, value: number) {
+                  if (
+                    aesMode === 2 ||
+                    seriesData.every((s: SeriesT) => s.no !== value)
+                  ) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('已存在序号'));
+                },
+              }),
+            ]}
           >
             <InputNumber min={1} />
           </Form.Item>
