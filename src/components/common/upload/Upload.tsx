@@ -32,7 +32,7 @@ const Upload: FC<LocalProps> = (props) => {
     const imgFile = ev?.target?.files?.[0];
     if (imgFile) {
       const { size, type } = imgFile;
-      const typeReg = /(png|jpe?g|webp\s*)$/;
+      const typeReg = /(png|jpe?g|webp)$/;
       if (!typeReg.test(type)) {
         message.error('请上传以下格式的图片：jpg/jpeg/png/webp');
       } else if (props.maxSize && size / 1000 > props.maxSize) {
