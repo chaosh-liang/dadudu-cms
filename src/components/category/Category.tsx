@@ -2,6 +2,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
+import cloneDeep from 'lodash/cloneDeep';
 import type { ColumnType } from 'rc-table/lib/interface';
 import {
   Space,
@@ -138,11 +139,12 @@ const Category: FC<RouteComponentProps> = (props) => {
     const {
       goodsinfo: { category },
     } = state;
-    category.forEach((item: CategoryT) => {
+    const copy = cloneDeep(category);
+    copy.forEach((item: CategoryT) => {
       if (Reflect.has(item, 'children'))
         Reflect.deleteProperty(item, 'children');
     });
-    return category;
+    return copy;
   });
 
   // 添加 => 弹框
