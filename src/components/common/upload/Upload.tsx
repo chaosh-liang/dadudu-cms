@@ -32,9 +32,9 @@ const Upload: FC<LocalProps> = (props) => {
     const imgFile = ev?.target?.files?.[0];
     if (imgFile) {
       const { size, type } = imgFile;
-      const typeReg = /(png|jpe?g|webp)$/;
+      const typeReg = /(png|jpe?g|webp|gif)$/;
       if (!typeReg.test(type)) {
-        message.error('请上传以下格式的图片：jpg/jpeg/png/webp');
+        message.error('请上传以下格式的图片：jpg/jpeg/png/webp/gif');
       } else if (props.maxSize && size / 1000 > props.maxSize) {
         message.error(`大小不超过 ${props.maxSize}kb`);
       } else {
@@ -86,7 +86,7 @@ const Upload: FC<LocalProps> = (props) => {
             className={styles['icon-file']}
             ref={fileInputEl}
             onChange={fileChangeEvent}
-            accept='image/jpeg, image/png'
+            accept='image/jpeg, image/png, image/gif'
           />
         </div>
         <div className={styles['btn-group']}>

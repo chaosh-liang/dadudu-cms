@@ -266,6 +266,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
           if (res?.error_code === '00') {
             message.success('编辑成功');
             setAESVisible(false);
+            setGt(gt + 1); // 重新获取一次系列数据
             // redux-thunk 获取一次类别数据
             dispatch(fetchCategoryThunk());
           } else {
