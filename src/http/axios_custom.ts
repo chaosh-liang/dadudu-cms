@@ -1,3 +1,4 @@
+import { message } from 'antd';
 import axios, { AxiosResponse, AxiosInstance } from 'axios';
 
 const TIMEOUT = 10000;
@@ -27,6 +28,19 @@ class CustomAxios {
     this.axiosInst.defaults.headers.get['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
     this.axiosInst.defaults.headers.post['Content-Type'] = 'application/json;charset=utf-8';
 
+    // 请求拦截器
+    /* this.axiosInst.interceptors.request.use(config => {
+      // console.log('interceptors.request => ', config);
+      const { url, withCredentials } = config;
+      if (url?.startsWith('/api/author') && !withCredentials) {
+        config.withCredentials = true;
+      }
+      return config;
+    }, error => {
+      console.log('interceptors.request => ', error);
+      return Promise.reject(error);
+    }); */
+
     // 响应拦截器
     this.axiosInst.interceptors.response.use(
       // 请求成功
@@ -39,13 +53,11 @@ class CustomAxios {
       },
       // 请求失败
       (error: any) => {
-        /* const { response } = error;
+        const { response } = error;
         if (response) {
           // 请求已发出，但是不在2xx的范围
           this.errorHandle(response);
-        } */
-        console.error('接口请求出错', error);
-        // LoadingInstance.close();
+        }
         return Promise.reject(error);
       }
     );
@@ -60,12 +72,17 @@ class CustomAxios {
    * http握手错误
    * @param res  响应回调,根据不同响应进行不同操作
    */
-  /* private errorHandle(res: any) {
+  private errorHandle(res: any) {
     // 状态码判断
     switch (res.status) {
       case 401:
-        console.error('401');
-        window.top.location.href = '/page/authority/login/login.html'; // 登录界面
+        // console.error('401');
+        if (!window.author401) {
+          window.author401 = message.error('请重新登录', 4, () => {
+          window.author401 = null;
+          window.location.href = '/#/login'; // 登录界面
+        });
+      }
         break;
       case 403: // 密码过期/此接口无权限
         console.error('无权限');
@@ -77,7 +94,7 @@ class CustomAxios {
         console.error('服务器错误');
         break;
     }
-  } */
+  }
 }
 
 // 工厂模式

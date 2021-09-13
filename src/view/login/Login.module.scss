@@ -13,7 +13,7 @@
     align-items: center;
     position: absolute;
     top: 50%;
-    right: 100px;
+    right: 10%;
     width: 350px;
     height: 260px;
     border-radius: 2px;
@@ -27,7 +27,7 @@
       .ant-form-item {
         &:last-child { margin-bottom: 0; }
       }
-      .ant-btn { width: 100%; }
+      // .ant-btn { width: 50%; }
     }
   }
 }

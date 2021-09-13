@@ -25,6 +25,7 @@ const Goods: FC<RouteComponentProps> = () => {
   const { data, loading: fetchAllGoodsLoading } = useRequest(
     fetchAllGoods.bind(null, { page_index, page_size }),
     {
+      throwOnError: true,
       refreshDeps: [gt, page_index, page_size],
       formatResult({ data: { res, total, page_index, page_size } }) {
         // 格式化接口返回的数据
@@ -60,6 +61,9 @@ const Goods: FC<RouteComponentProps> = () => {
         });
         return { goods, total, page_index, page_size };
       },
+      onError(error) {
+        console.log('Goods.tsx fetchAllGoods error => ', error);
+      }
     }
   );
 

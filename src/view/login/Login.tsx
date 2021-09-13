@@ -1,8 +1,8 @@
 import React, { FC } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps, useHistory } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 import { Form, Input, Button } from 'antd';
-import { login } from 'src/api/author';
+import { login, logout } from 'src/api/author';
 import Styles from './Login.module.scss';
 
 interface UserInfo {
@@ -10,7 +10,8 @@ interface UserInfo {
   password: string;
 }
 
-const Login: FC<RouteComponentProps> = () => {
+const Login: FC<RouteComponentProps> = (props) => {
+  const history = useHistory();
   // 加密（HmacSHA256）
   const encryption = (val: string) => {
     const Ciphertext = CryptoJS.HmacSHA256(val, 'DADUDU_CMS');
@@ -23,13 +24,19 @@ const Login: FC<RouteComponentProps> = () => {
     const params = { user_name, password: encryption(password) }
     console.log('onFinish => ', values, params);
     const res = await login(params);
-    console.log('login res =>', res);
+    if (res?.error_code === '00') {
+      history.replace("/home");
+    }
   };
 
   // 	提交表单且数据验证失败后回调事件
   const onFinishFailed = (errorInfo: any) => {
     console.log('onFinishFailed: ', errorInfo);
   };
+
+  const handleLogout = () => {
+    logout()
+  }
 
   return (
     <div className={Styles.container}>
@@ -83,6 +90,9 @@ const Login: FC<RouteComponentProps> = () => {
           >
             <Button type='primary' htmlType='submit'>
               登录
+            </Button>
+            <Button onClick={handleLogout}>
+              注销
             </Button>
           </Form.Item>
         </Form>

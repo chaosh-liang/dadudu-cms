@@ -3,7 +3,7 @@
  * @Email: broli.up.up.up@gmail.com
  * @Date: 2021-09-08 22:58:45
  * @LastEditors: Broli
- * @LastEditTime: 2021-09-09 03:18:53
+ * @LastEditTime: 2021-09-14 00:41:10
  * @Description: 以下两种情况的操作，应在此文件中完成：
  * @Description: redux 中使用的副作用（如：请求）
  * @Description: store 中的公共方法（如：设置全局状态）
@@ -45,6 +45,9 @@ export const fetchCategoryThunk = () => {
         payload: { data: refineData },
       });
       return refineData; // 返回给发起 dispatch 的组件
+    })
+    .catch(error => {
+      console.log('readux_thunk.ts fetchCategories error => ', error);
     });
   };
 };
