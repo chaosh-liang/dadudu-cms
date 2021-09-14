@@ -10,9 +10,13 @@
     justify-content: center;
     align-items: center;
     padding: 0;
-    :global(.ant-menu) { flex: 1; }
-    .logout {
-      margin-right: 20px;
+    :global {
+      .ant-menu {
+        flex: 1;
+      }
+      .ant-btn:last-of-type {
+        margin-right: 20px;
+      }
     }
   }
   .content {

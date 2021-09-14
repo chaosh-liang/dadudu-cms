@@ -13,7 +13,7 @@ import Settings from '@/components/settings/Settings';
 import { Button, Layout, Menu, Modal } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import styles from './Home.module.scss';
-import { logout } from '@/api/author';
+import { logCheck, logout } from '@/api/author';
 const { Header, Content } = Layout;
 
 const Home: FC<RouteComponentProps> = (props) => {
@@ -28,6 +28,7 @@ const Home: FC<RouteComponentProps> = (props) => {
 
   const history = useHistory();
 
+  // 注销登录
   const handleLogout = () => {
     Modal.confirm({
       title: '提示',
@@ -40,8 +41,14 @@ const Home: FC<RouteComponentProps> = (props) => {
         if (res?.error_code === '00') {
           history.push('/login');
         }
-      }
+      },
     });
+  };
+
+  // FIXME: dev TODO: 调试用
+  const handleLogCheck = async () => {
+    const res = await logCheck();
+    console.log('handleLogCheck => ', res);
   };
 
   return (
@@ -57,7 +64,10 @@ const Home: FC<RouteComponentProps> = (props) => {
               );
             })}
           </Menu>
-          <Button className={styles.logout} type="link" onClick={handleLogout}>
+          <Button type='link' onClick={handleLogCheck}>
+            校验-在线（调试）
+          </Button>
+          <Button type='link' onClick={handleLogout}>
             注销
           </Button>
         </Header>
