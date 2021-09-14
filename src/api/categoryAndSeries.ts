@@ -1,5 +1,5 @@
-import type { CategoryT } from 'src/@types/category';
-import type { SeriesT } from 'src/@types/series';
+import type { CategoryT } from '@/@types/category';
+import type { SeriesT } from '@/@types/series';
 import Service from '../http';
 const service = new Service();
 

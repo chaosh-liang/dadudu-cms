@@ -1,5 +1,5 @@
 import createAxios from './axios_custom';
-import type { LocalResponseType } from 'src/@types/shared';
+import type { LocalResponseType } from '@/@types/shared';
 export default class Service {
   private axios: any;
 

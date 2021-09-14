@@ -10,7 +10,8 @@ class CustomAxios {
   private axiosInst: AxiosInstance;
 
   private constructor() {
-    this.axiosInst = axios.create({ baseURL, timeout: TIMEOUT });
+    // withCredentials: 带上 cookie。也可以在 interceptors.request 设置规则
+    this.axiosInst = axios.create({ baseURL, timeout: TIMEOUT, withCredentials: true });
     this.setAxiosInterceptors();
   }
   
@@ -32,7 +33,7 @@ class CustomAxios {
     /* this.axiosInst.interceptors.request.use(config => {
       // console.log('interceptors.request => ', config);
       const { url, withCredentials } = config;
-      if (url?.startsWith('/api/author') && !withCredentials) {
+      if (!url?.startsWith('/api/author') && !withCredentials) {
         config.withCredentials = true;
       }
       return config;
@@ -80,7 +81,8 @@ class CustomAxios {
         if (!window.author401) {
           window.author401 = message.error('请重新登录', 4, () => {
           window.author401 = null;
-          window.location.href = '/#/login'; // 登录界面
+          const { location: { origin } } = window;
+          window.location.href = `${origin}/#/login`; // 登录界面
         });
       }
         break;

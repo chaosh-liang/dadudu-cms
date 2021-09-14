@@ -1,4 +1,4 @@
-import { ActionType } from 'src/store/action_type';
+import { ActionType } from '@/store/action_type';
 import type { AnyAction, Reducer } from 'redux';
 
 const initState = {

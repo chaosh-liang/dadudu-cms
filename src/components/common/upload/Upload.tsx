@@ -2,7 +2,7 @@ import React, { FC, useRef, useState } from 'react';
 import { Button, Input, message } from 'antd';
 import { CloudUploadOutlined } from '@ant-design/icons';
 import styles from './Upload.module.scss';
-import { upload } from 'src/api/shared';
+import { upload } from '@/api/shared';
 interface LocalProps {
   filePath?: string;
   labelWidth?: number;

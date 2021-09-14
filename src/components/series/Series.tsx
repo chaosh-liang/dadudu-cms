@@ -7,7 +7,7 @@ import {
   deleteSeries,
   editSeries,
   fetchSeries,
-} from 'src/api/categoryAndSeries';
+} from '@/api/categoryAndSeries';
 import { useRequest } from 'ahooks';
 import type { ColumnType } from 'rc-table/lib/interface';
 import {
@@ -22,13 +22,13 @@ import {
   InputNumber,
   Select,
 } from 'antd';
-import type { CategoryT } from 'src/@types/category';
-import type { SeriesT } from 'src/@types/series';
+import type { CategoryT } from '@/@types/category';
+import type { SeriesT } from '@/@types/series';
 import styles from './Series.module.scss';
-import { formatDate } from 'src/utils';
+import { formatDate } from '@/utils';
 import isEqual from 'lodash/isEqual';
-import { fetchCategoryThunk } from 'src/store/redux_thunk';
-import LocalUpload from 'src/components/common/upload/Upload';
+import { fetchCategoryThunk } from '@/store/redux_thunk';
+import LocalUpload from '@/components/common/upload/Upload';
 
 type SeriesTable = SeriesT & {
   key: string;

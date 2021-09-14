@@ -8,11 +8,11 @@
  * @Description: redux 中使用的副作用（如：请求）
  * @Description: store 中的公共方法（如：设置全局状态）
  */
-import { formatDate } from 'src/utils';
-import { ActionType } from 'src/store/action_type';
-import { fetchCategories } from 'src/api/categoryAndSeries';
+import { formatDate } from '@/utils';
+import { ActionType } from '@/store/action_type';
+import { fetchCategories } from '@/api/categoryAndSeries';
 import type { Dispatch } from 'redux';
-import type { CategoryT } from 'src/@types/category';
+import type { CategoryT } from '@/@types/category';
 
 // 获取类别
 export const fetchCategoryThunk = () => {

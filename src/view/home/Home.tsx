@@ -5,12 +5,15 @@ import {
   Route,
   Switch,
   Redirect,
+  useHistory,
 } from 'react-router-dom';
-import GoodsInfo from 'src/components/goods_info/Goods_info';
-import Order from 'src/components/order/Order';
-import Settings from 'src/components/settings/Settings';
-import { Layout, Menu } from 'antd';
+import GoodsInfo from '@/components/goods_info/Goods_info';
+import Order from '@/components/order/Order';
+import Settings from '@/components/settings/Settings';
+import { Button, Layout, Menu, Modal } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import styles from './Home.module.scss';
+import { logout } from '@/api/author';
 const { Header, Content } = Layout;
 
 const Home: FC<RouteComponentProps> = (props) => {
@@ -22,10 +25,29 @@ const Home: FC<RouteComponentProps> = (props) => {
     { name: '订单管理', route: '/home/order' },
     { name: '设置中心', route: '/home/settings' },
   ];
+
+  const history = useHistory();
+
+  const handleLogout = () => {
+    Modal.confirm({
+      title: '提示',
+      icon: <ExclamationCircleOutlined />,
+      content: '确定要注销登录吗？',
+      okText: '确定',
+      cancelText: '取消',
+      async onOk() {
+        const res = await logout();
+        if (res?.error_code === '00') {
+          history.push('/login');
+        }
+      }
+    });
+  };
+
   return (
     <div className={styles.container}>
       <Layout className='layout'>
-        <Header>
+        <Header className={styles.header}>
           <Menu theme='dark' mode='horizontal' defaultSelectedKeys={['goods']}>
             {menu.map((item) => {
               return (
@@ -35,6 +57,9 @@ const Home: FC<RouteComponentProps> = (props) => {
               );
             })}
           </Menu>
+          <Button className={styles.logout} type="link" onClick={handleLogout}>
+            注销
+          </Button>
         </Header>
         <Content className={styles.content}>
           <Switch>

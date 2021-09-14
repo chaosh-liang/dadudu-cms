@@ -16,13 +16,13 @@ import {
   InputNumber,
 } from 'antd';
 import styles from './Category.module.scss';
-import type { CategoryT } from 'src/@types/category';
+import type { CategoryT } from '@/@types/category';
 import {
   addCategory,
   deleteCategory,
   editCategory,
-} from 'src/api/categoryAndSeries';
-import { fetchCategoryThunk } from 'src/store/redux_thunk';
+} from '@/api/categoryAndSeries';
+import { fetchCategoryThunk } from '@/store/redux_thunk';
 
 const Category: FC<RouteComponentProps> = (props) => {
   const {

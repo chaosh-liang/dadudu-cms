@@ -9,14 +9,14 @@ import {
 import { Layout, Menu, Spin } from 'antd';
 import { useMount } from 'ahooks';
 import { PieChartOutlined, DesktopOutlined } from '@ant-design/icons';
-import Goods from 'src/components/goods/Goods';
-import Category from 'src/components/category/Category';
-import Series from 'src/components/series/Series';
+import Goods from '@/components/goods/Goods';
+import Category from '@/components/category/Category';
+import Series from '@/components/series/Series';
 import styles from './Goods_info.module.scss';
 import { useDispatch } from 'react-redux';
-import store, { injectReducer } from 'src/store';
+import store, { injectReducer } from '@/store';
 import reducer from './reducer';
-import { fetchCategoryThunk } from 'src/store/redux_thunk';
+import { fetchCategoryThunk } from '@/store/redux_thunk';
 
 const { Content } = Layout;
 

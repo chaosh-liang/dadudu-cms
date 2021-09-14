@@ -1,8 +1,8 @@
 import React, { FC } from 'react';
 import { RouteComponentProps, useHistory } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
-import { Form, Input, Button } from 'antd';
-import { login, logout } from 'src/api/author';
+import { Form, Input, Button, message } from 'antd';
+import { login } from '@/api/author';
 import Styles from './Login.module.scss';
 
 interface UserInfo {
@@ -26,6 +26,8 @@ const Login: FC<RouteComponentProps> = (props) => {
     const res = await login(params);
     if (res?.error_code === '00') {
       history.replace("/home");
+    } else {
+      message.error(res?.error_msg);
     }
   };
 
@@ -33,10 +35,6 @@ const Login: FC<RouteComponentProps> = (props) => {
   const onFinishFailed = (errorInfo: any) => {
     console.log('onFinishFailed: ', errorInfo);
   };
-
-  const handleLogout = () => {
-    logout()
-  }
 
   return (
     <div className={Styles.container}>
@@ -90,9 +88,6 @@ const Login: FC<RouteComponentProps> = (props) => {
           >
             <Button type='primary' htmlType='submit'>
               登录
-            </Button>
-            <Button onClick={handleLogout}>
-              注销
             </Button>
           </Form.Item>
         </Form>

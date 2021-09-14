@@ -24,10 +24,10 @@ import {
   Radio,
 } from 'antd';
 import isEqual from 'lodash/isEqual';
-import type { GoodsT } from 'src/@types/goods';
+import type { GoodsT } from '@/@types/goods';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
-import { addGoods, editGoods } from 'src/api/goods';
-import LocalUpload from 'src/components/common/upload/Upload';
+import { addGoods, editGoods } from '@/api/goods';
+import LocalUpload from '@/components/common/upload/Upload';
 import styles from './AEGModal.module.scss';
 
 interface LocalProps {

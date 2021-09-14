@@ -1,5 +1,5 @@
 import Service from '../http';
-import type { GoodsT } from 'src/@types/goods';
+import type { GoodsT } from '@/@types/goods';
 const service = new Service();
 
 const ALL_GOODS = '/api/goods';

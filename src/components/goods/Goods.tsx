@@ -3,11 +3,11 @@ import React, { FC, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Table, Space, Button, Modal, message, Popconfirm } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import type { GoodsT } from 'src/@types/goods';
+import type { GoodsT } from '@/@types/goods';
 import type { ColumnType } from 'rc-table/lib/interface';
 import { useRequest } from 'ahooks';
-import { fetchAllGoods, deleteGoods } from 'src/api/goods';
-import { formatDate } from 'src/utils';
+import { fetchAllGoods, deleteGoods } from '@/api/goods';
+import { formatDate } from '@/utils';
 import AEGModal from './AEGModal';
 import styles from './Goods.module.scss';
 
