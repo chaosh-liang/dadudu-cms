@@ -22,7 +22,7 @@ const Login: FC<RouteComponentProps> = (props) => {
   const onFinish = async (values: UserInfo) => {
     const { user_name, password } = values;
     const params = { user_name, password: encryption(password) }
-    console.log('onFinish => ', values, params);
+    // console.log('onFinish => ', values, params);
     const res = await login(params);
     if (res?.error_code === '00') {
       history.replace("/home");
