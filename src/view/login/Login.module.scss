@@ -20,6 +20,7 @@
     border: 1px solid #d9d9d9;
     transform: translate(-50%, -50%);
     background-color: #fff;
+    z-index: 10;
   }
   :global {
     .ant-form {

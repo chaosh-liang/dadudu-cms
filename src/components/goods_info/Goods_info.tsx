@@ -1,10 +1,12 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
   RouteComponentProps,
   Link,
   Route,
   Switch,
   Redirect,
+  useLocation,
+  useRouteMatch,
 } from 'react-router-dom';
 import { Layout, Menu, Spin } from 'antd';
 import { useMount } from 'ahooks';
@@ -13,7 +15,7 @@ import Goods from '@/components/goods/Goods';
 import Category from '@/components/category/Category';
 import Series from '@/components/series/Series';
 import styles from './Goods_info.module.scss';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import store, { injectReducer } from '@/store';
 import reducer from './reducer';
 import { fetchCategoryThunk } from '@/store/redux_thunk';
@@ -36,27 +38,31 @@ const menu = [
 // 动态注入 reducer
 injectReducer(store, { key: 'goodsinfo', reducer });
 
-const GoodsInfo: FC<RouteComponentProps> = (props) => {
-  const {
-    match: { path },
-  } = props;
-  const [contentvh, setContentvh] = useState(600); // 计算高度
-  const [layoutLoading, setLayoutLoading] = useState(true);
+const GoodsInfo: FC<RouteComponentProps> = () => {
   const dispatch = useDispatch();
+  const { path } = useRouteMatch();
+  const location = useLocation();
+  const [layoutLoading, setLayoutLoading] = useState(true);
+  const mainvh = useSelector((state: any) => state.init.mainvh);
+  const t_pathname = location.pathname.match(/^\/[^/]+\/[^/]+\/[^/]+/g)?.[0] ?? '';
+  const [curRoute, setCurRoute] = useState(t_pathname); // 设置当前路由高亮
 
   useMount(() => {
-    const rootEl = document.getElementById('root');
-    if (rootEl) setContentvh(rootEl?.offsetHeight - 64);
     // 获取所有类别
     (dispatch(fetchCategoryThunk()) as any).then((data: any) => {
       setLayoutLoading(false);
     });
   });
 
+  useEffect(() => {
+    const t_pathname = location.pathname.match(/^\/[^/]+\/[^/]+\/[^/]+/g)?.[0] ?? '';
+    setCurRoute(t_pathname);
+  }, [location]);
+
   // 获取类别和系列
   return (
-    <div className={styles.container}>
-      <Menu mode='vertical' defaultSelectedKeys={['goods']}>
+    <div className={styles.container} style={{ minHeight: `${mainvh}px` }}>
+      <Menu mode='vertical' selectedKeys={[curRoute]}>
         {menu.map((item) => {
           return (
             <Menu.Item key={item.route} icon={item.icon}>
@@ -65,7 +71,7 @@ const GoodsInfo: FC<RouteComponentProps> = (props) => {
           );
         })}
       </Menu>
-      <Content style={{ minHeight: `${contentvh}px` }}>
+      <Content>
         <Spin spinning={layoutLoading}>
           <Switch>
             <Route

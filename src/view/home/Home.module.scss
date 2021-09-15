@@ -1,28 +1,21 @@
 .container {
-  :global(.ant-layout-header) {
-    position: fixed;
-    z-index: 1;
-    width: 100%;
-  }
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   .header {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding: 0;
+    padding: 0 20px;
     :global {
       .ant-menu {
         flex: 1;
       }
-      .ant-btn:last-of-type {
-        margin-right: 20px;
-      }
     }
   }
-  .content {
-    height: 100vh;
-    padding: 84px 20px 20px;
+  .main {
+    min-height: 768px;
     overflow-y: auto;
-    box-sizing: border-box;
   }
 }

@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, RouteComponentProps } from 'react-router-dom';
+import { Link, RouteComponentProps, useRouteMatch } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
 import cloneDeep from 'lodash/cloneDeep';
 import type { ColumnType } from 'rc-table/lib/interface';
@@ -24,10 +24,8 @@ import {
 } from '@/api/categoryAndSeries';
 import { fetchCategoryThunk } from '@/store/redux_thunk';
 
-const Category: FC<RouteComponentProps> = (props) => {
-  const {
-    match: { path },
-  } = props;
+const Category: FC<RouteComponentProps> = () => {
+  const { path } = useRouteMatch();
   // 表格列定义
   const columns: ColumnType<Required<CategoryT>>[] = [
     {

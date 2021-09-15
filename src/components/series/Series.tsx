@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { FC, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, RouteComponentProps } from 'react-router-dom';
+import { Link, RouteComponentProps, useParams } from 'react-router-dom';
 import {
   addSeries,
   deleteSeries,
@@ -37,13 +37,8 @@ type SeriesTable = SeriesT & {
   update_time: string;
 };
 
-const Series: FC<RouteComponentProps<{ id: string }>> = (props) => {
-  const {
-    match: {
-      params: { id: category_id },
-    },
-  } = props;
-
+const Series: FC<RouteComponentProps<{ id: string }>> = () => {
+  const { id: category_id } = useParams<{ id: string; }>();
   const formData: SeriesT = {
     name: '',
     category_id,

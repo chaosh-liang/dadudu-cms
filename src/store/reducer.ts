@@ -5,6 +5,7 @@ const initState = {
   // 初始 state
   field1: '示例字段1',
   field2: '示例字段2',
+  mainvh: 768
 };
 
 // action 类型固定了，必须是 AnyAction
@@ -19,6 +20,10 @@ const initialReducer: Reducer<typeof initState, AnyAction> = (
     case ActionType.INIT_EXAMPLE_DATA: {
       const { example } = payload;
       return { ...state, field1: example };
+    }
+    case ActionType.SET_MAIN_VH: {
+      const { h } = payload;
+      return { ...state, mainvh: h };
     }
     default:
       return state;

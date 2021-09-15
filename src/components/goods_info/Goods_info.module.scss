@@ -1,7 +1,8 @@
 .container {
   display: flex;
   flex-direction: row;
-  min-height: 0;
+  min-height: 768px;
+  padding: 20px;
   background: #f0f2f5;
   :global {
     .ant-menu-root.ant-menu-vertical {
@@ -10,6 +11,12 @@
     }
     .ant-layout-content {
       padding: 0;
+      .ant-spin-nested-loading {
+        height: 100%;
+        .ant-spin-container {
+          height: inherit;
+        }
+      }
     }
   }
 }

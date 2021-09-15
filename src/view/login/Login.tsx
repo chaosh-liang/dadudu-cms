@@ -10,7 +10,7 @@ interface UserInfo {
   password: string;
 }
 
-const Login: FC<RouteComponentProps> = (props) => {
+const Login: FC<RouteComponentProps> = () => {
   const history = useHistory();
   // 加密（HmacSHA256）
   const encryption = (val: string) => {
