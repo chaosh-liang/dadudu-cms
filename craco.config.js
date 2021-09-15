@@ -1,9 +1,22 @@
 const path = require('path');
-const { whenProd, whenDev } = require('@craco/craco');
+const { whenProd } = require('@craco/craco');
 const TerserPlugin = require('terser-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 
 module.exports = {
+  devServer: {
+    host: '0.0.0.0',
+    useLocalIp: true,
+    proxy: {
+      '/api': {
+        // url 会自动补全：`${target}/api`
+        target: 'http://localhost:7716/dadudu', // 本地服务
+        // target: 'http://101.34.21.222/dadudu', // 线上服务
+        secure: false,
+        changeOrigin: true,
+      },
+    },
+  },
   webpack: {
     alias: {
       '@': path.join(__dirname, 'src'),
@@ -13,21 +26,6 @@ module.exports = {
     ],
     configure: (webpackConfig, { env, paths }) => {
       paths.appBuild = 'dist';
-      webpackConfig.devServer = whenDev(
-        () => ({
-          host: '0.0.0.0',
-          useLocalIp: true,
-          proxy: {
-            '/dadudu/api': {
-              // url 会自动补全：`${target}/dadudu/api`
-              target: 'http://localhost:7716',
-              secure: false,
-              changeOrigin: true,
-            },
-          },
-        }),
-        webpackConfig.devServer
-      );
       webpackConfig.devtool = whenProd(() => false, webpackConfig.devtool);
       webpackConfig.output = {
         ...webpackConfig.output,

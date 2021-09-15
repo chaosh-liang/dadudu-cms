@@ -2,8 +2,7 @@ import { message } from 'antd';
 import axios, { AxiosResponse, AxiosInstance } from 'axios';
 
 const TIMEOUT = 10000;
-const baseURL = process.env.REACT_APP_BASE_URL;
-// console.log('REACT_APP_BASE_URL => ', baseURL);
+const baseURL = process.env.NODE_ENV === 'production' ? '/dadudu' : '';
 
 class CustomAxios {
   private static instance: CustomAxios;
