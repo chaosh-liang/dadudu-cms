@@ -27,8 +27,9 @@
   "scripts": {
     "dll:dev": "webpack --config webpack.dll.js --env.NODE_ENV=dev",
     "dll:pro": "webpack --config webpack.dll.js --env.NODE_ENV=pro",
-    "start": "npm run dll:dev && craco start",
-    "build": "npm run dll:pro && craco build"
+    "start": "npm run dll:dev && react-script start",
+    "build": "npm run dll:pro && react-script build",
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
