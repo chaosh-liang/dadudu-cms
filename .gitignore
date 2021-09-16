@@ -12,6 +12,9 @@
 /build
 /dist*
 /dadudu
+dll_dev
+dll_pro
+analyzer
 *.zip
 
 # misc

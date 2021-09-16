@@ -63,7 +63,7 @@ const Goods: FC<RouteComponentProps> = () => {
       },
       onError(error) {
         console.log('Goods.tsx fetchAllGoods error => ', error);
-      }
+      },
     }
   );
 
@@ -166,78 +166,91 @@ const Goods: FC<RouteComponentProps> = () => {
       dataIndex: 'sequence',
       key: 'sequence',
       align: 'center',
+      width: 50,
     },
     {
       title: '商品名称',
       dataIndex: 'name',
       key: 'name',
       align: 'center',
+      width: 100,
     },
     {
       title: '价格',
       dataIndex: 'price',
       key: 'price',
       align: 'center',
+      width: 65,
     },
     {
       title: '折扣数量',
       dataIndex: 'discount_threshold',
       key: 'discount_threshold',
       align: 'center',
+      width: 75,
     },
     {
       title: '折扣价',
       dataIndex: 'discount_price',
       key: 'discount_price',
       align: 'center',
+      width: 65,
     },
     {
       title: '单位',
       dataIndex: 'count_unit',
       key: 'count_unit',
       align: 'center',
+      width: 50,
     },
     {
       title: '货币',
       dataIndex: 'currency_unit',
       key: 'currency_unit',
       align: 'center',
+      width: 50,
     },
     {
       title: '类别',
       dataIndex: 'category_name',
       key: 'category_name',
       align: 'center',
+      width: 80,
     },
     {
       title: '系列',
       dataIndex: 'series_name',
       key: 'series_name',
       align: 'center',
+      width: 80,
     },
     {
       title: '主页轮播',
       dataIndex: 'is_home_banner',
       key: 'is_home_banner',
       align: 'center',
+      width: 80,
     },
     {
       title: '主页展示',
       dataIndex: 'is_home_display',
       key: 'is_home_display',
       align: 'center',
+      width: 80,
     },
     {
       title: '创建时间',
       dataIndex: 'create_time',
       key: 'create_time',
       align: 'center',
+      width: 150,
     },
     {
       title: '更新时间',
       dataIndex: 'update_time',
       key: 'update_time',
       align: 'center',
+      width: 150,
     },
     {
       title: '描述',
@@ -249,9 +262,14 @@ const Goods: FC<RouteComponentProps> = () => {
       title: '操作',
       key: 'action',
       align: 'center',
+      width: 150,
       render: (text: string, record: Required<GoodsT>) => (
-        <Space size='small'>
-          <Button className={styles['operation-btn']} type='link' onClick={() => overviewGoods(record)}>
+        <Space size={3}>
+          <Button
+            className={styles['operation-btn']}
+            type='link'
+            onClick={() => overviewGoods(record)}
+          >
             预览
           </Button>
           <Button
