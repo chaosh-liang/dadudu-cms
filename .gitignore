@@ -15,6 +15,7 @@
 dll_dev
 dll_pro
 analyzer
+local-proxy.js
 *.zip
 
 # misc
