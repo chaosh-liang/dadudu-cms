@@ -27,9 +27,8 @@
   "scripts": {
     "dll:dev": "webpack --config webpack.dll.js --env.NODE_ENV=dev",
     "dll:pro": "webpack --config webpack.dll.js --env.NODE_ENV=pro",
-    "start": "npm run dll:dev && react-script start",
-    "build": "npm run dll:pro && react-script build",
-    "eject": "react-scripts eject"
+    "start": "craco start",
+    "build": "craco build"
   },
   "eslintConfig": {
     "extends": [
@@ -57,6 +56,7 @@
     "add-asset-html-webpack-plugin": "^3.2.0",
     "clean-webpack-plugin": "^4.0.0",
     "node-sass": "^6.0.1",
+    "postcss-safe-parser": "^6.0.0",
     "redux-devtools-extension": "^2.13.9",
     "sass-loader": "^12.1.0",
     "simple-progress-webpack-plugin": "^2.0.0",
