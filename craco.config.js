@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
-const { DllReferencePlugin } = require('webpack');
+// const { DllReferencePlugin } = require('webpack');
 const { whenProd, whenDev } = require('@craco/craco');
 // const TerserPlugin = require('terser-webpack-plugin');
 // const safePostCssParser = require('postcss-safe-parser');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const AddAssetHtmlWebpackPlugin = require('add-asset-html-webpack-plugin');
+// const AddAssetHtmlWebpackPlugin = require('add-asset-html-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 // const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
@@ -23,7 +23,7 @@ let proxy = {
   '/api': {
     // url 会自动补全：`${target}/api`
     target: 'http://localhost:7716/cms/dadudu', // 本地服务
-    // target: 'http://101.34.21.222/cms/dadudu', // 线上服务
+    // target: 'http://101.34.21.222/cms/dadudu', // 线上服务-无需端口
     secure: false,
     changeOrigin: true,
   },
