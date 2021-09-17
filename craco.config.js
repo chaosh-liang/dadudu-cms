@@ -176,12 +176,10 @@ module.exports = {
       },
     }, */
     configure: (webpackConfig, { env, paths }) => {
-      paths.appBuild = 'dist';
       webpackConfig.devtool = whenProd(() => false, webpackConfig.devtool);
       webpackConfig.output = {
         ...webpackConfig.output,
         publicPath: './',
-        path: path.resolve(__dirname, 'dist'),
         filename: 'js/[id].bundle.[hash:4].js',
         chunkFilename: 'js/[id].[chunkhash:6].js',
       };
