@@ -30,5 +30,15 @@
   }
   .section {
     flex: 1;
+    :global {
+      .ant-carousel .slick-slide {
+        height: 375px;
+        :local {
+          .carousel-item {
+            height: 375px;
+          }
+        }
+      }
+    }
   }
 }

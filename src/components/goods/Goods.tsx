@@ -1,7 +1,16 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { FC, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Table, Space, Button, Modal, message, Popconfirm } from 'antd';
+import {
+  Table,
+  Space,
+  Button,
+  Modal,
+  message,
+  Popconfirm,
+  Drawer,
+  Carousel,
+} from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import type { GoodsT } from '@/@types/goods';
 import type { ColumnType } from 'rc-table/lib/interface';
@@ -12,14 +21,33 @@ import AEGModal from './AEGModal';
 import styles from './Goods.module.scss';
 
 const Goods: FC<RouteComponentProps> = () => {
+  const initOvData = {
+    name: '',
+    price: 1,
+    desc: '',
+    discount_price: 1,
+    discount_threshold: 1,
+    count_unit: '',
+    currency_unit: '￥',
+    home_banner: false,
+    home_display: false,
+    series_id: '',
+    category_id: '',
+    icon_url: '',
+    desc_url: [''],
+    banner_url: [''],
+  };
   const [gt, setGt] = useState(0); // 为了触发获取商品请求
   const [page_index, setPageIndex] = useState(1);
   const [aegMode, setAEGMode] = useState(1); // 1：添加，2：编辑
   const [aegVisible, setAEGVisible] = useState(false);
   const [aegData, setAEGData] = useState<GoodsT | null>(null);
   const [page_size, setPageSize] = useState(10);
+  const [ovVisible, setOVVisible] = useState(false);
   const [selectionIds, setSelectionIds] = useState<React.Key[]>([]);
   const [selectionRows, setSelectionRows] = useState<Required<GoodsT>[]>([]);
+  // const [ovData, setOVData] = useState<GoodsT & Record<string, any>>(initOvData);
+  const [ovData, setOVData] = useState<GoodsT>(initOvData);
 
   // 获取所有商品
   const { data, loading: fetchAllGoodsLoading } = useRequest(
@@ -92,7 +120,13 @@ const Goods: FC<RouteComponentProps> = () => {
 
   // TODO: 预览
   const overviewGoods = (record: GoodsT) => {
-    console.log('overviewGoods');
+    console.log('overviewGoods => ', record);
+    setOVVisible(true);
+    setOVData(record);
+  };
+
+  const handleOVClose = () => {
+    setOVVisible(false);
   };
 
   // 编辑
@@ -344,6 +378,57 @@ const Goods: FC<RouteComponentProps> = () => {
           }}
         />
       </section>
+      <Drawer
+        title={ovData.name}
+        width={423}
+        destroyOnClose
+        onClose={handleOVClose}
+        visible={ovVisible}
+        getContainer={false} // 挂载在当前 div 节点下，而不是 document.body
+      >
+        <Carousel>
+          {ovData.banner_url.map((url) => (
+            <div className={styles['carousel-item']} key={url}>
+              <img
+                alt='banner-url'
+                src={url}
+                style={{ width: 375, height: 375 }}
+              />
+            </div>
+          ))}
+        </Carousel>
+        <div className={styles['price-area']}>
+          <div className={styles['price-info']}>
+            <span className={styles.price}>
+              {ovData.currency_unit}
+              {ovData.price}
+            </span>
+            <span className={styles.unit}>/{ovData.count_unit}</span>
+          </div>
+          <div className={styles['price-discount']}>
+            <span>
+              {ovData.currency_unit}
+              {ovData.discount_price}
+            </span>
+            <span>
+              /{ovData.discount_threshold}
+              {ovData.count_unit}
+            </span>
+          </div>
+          <div className={styles.desc}>{ovData.desc}</div>
+        </div>
+        <div className={styles['desc-box']}>
+          {ovData.desc_url.map((url) => (
+            <div className={styles['desc-img-wrapper']} key={url}>
+              <img
+                alt='desc-url'
+                src={url}
+                style={{ width: 375, height: 375 }}
+              />
+            </div>
+          ))}
+        </div>
+      </Drawer>
       <AEGModal
         mode={aegMode}
         visible={aegVisible}
