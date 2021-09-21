@@ -118,9 +118,9 @@ const Goods: FC<RouteComponentProps> = () => {
     setAEGVisible(true);
   };
 
-  // TODO: 预览
+  // 预览
   const overviewGoods = (record: GoodsT) => {
-    console.log('overviewGoods => ', record);
+    // console.log('overviewGoods => ', record);
     setOVVisible(true);
     setOVData(record);
   };
@@ -379,54 +379,51 @@ const Goods: FC<RouteComponentProps> = () => {
         />
       </section>
       <Drawer
-        title={ovData.name}
-        width={423}
+        title='iPhone X 模拟器'
+        width={425}
         destroyOnClose
         onClose={handleOVClose}
         visible={ovVisible}
         getContainer={false} // 挂载在当前 div 节点下，而不是 document.body
       >
-        <Carousel>
-          {ovData.banner_url.map((url) => (
-            <div className={styles['carousel-item']} key={url}>
-              <img
-                alt='banner-url'
-                src={url}
-                style={{ width: 375, height: 375 }}
-              />
+        <div className={styles['phone-emulator']}>
+          <Carousel>
+            {ovData.banner_url.map((url) => (
+              <div className={styles['carousel-item']} key={url}>
+                <img alt='banner-url' src={url} />
+              </div>
+            ))}
+          </Carousel>
+          <div className={styles['price-area']}>
+            <div className={styles['price-info']}>
+              <span className={styles.price}>
+                {ovData.currency_unit}
+                {ovData.price}
+              </span>
+              <span className={styles.unit}>/{ovData.count_unit}</span>
             </div>
-          ))}
-        </Carousel>
-        <div className={styles['price-area']}>
-          <div className={styles['price-info']}>
-            <span className={styles.price}>
-              {ovData.currency_unit}
-              {ovData.price}
-            </span>
-            <span className={styles.unit}>/{ovData.count_unit}</span>
-          </div>
-          <div className={styles['price-discount']}>
-            <span>
-              {ovData.currency_unit}
-              {ovData.discount_price}
-            </span>
-            <span>
-              /{ovData.discount_threshold}
-              {ovData.count_unit}
-            </span>
-          </div>
-          <div className={styles.desc}>{ovData.desc}</div>
-        </div>
-        <div className={styles['desc-box']}>
-          {ovData.desc_url.map((url) => (
-            <div className={styles['desc-img-wrapper']} key={url}>
-              <img
-                alt='desc-url'
-                src={url}
-                style={{ width: 375, height: 375 }}
-              />
+            <div className={styles['price-discount']}>
+              <span>
+                {ovData.currency_unit}
+                {ovData.discount_price}
+              </span>
+              <span>
+                /{ovData.discount_threshold}
+                {ovData.count_unit}
+              </span>
             </div>
-          ))}
+            <div className={styles.desc}>{ovData.desc}</div>
+          </div>
+          <div className={styles['desc-box']}>
+            {ovData.desc_url.map((url) => (
+              <div className={styles['img-wrapper']} key={url}>
+                <img
+                  alt='desc-url'
+                  src={url}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </Drawer>
       <AEGModal
