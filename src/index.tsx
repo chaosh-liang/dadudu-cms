@@ -32,7 +32,7 @@ const RenderJsx = () => (
               backgroundColor: '#f0f2f5',
             }}
           >
-            应用加载中异常，请检查网络或联系管理员
+            应用加载异常，请检查网络或联系管理员
           </div>
         }
       >
