@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { RouteComponentProps, useHistory } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 import { Form, Input, Button, message } from 'antd';
@@ -12,6 +12,8 @@ interface UserInfo {
 
 const Login: FC<RouteComponentProps> = () => {
   const history = useHistory();
+  const [logining, setLogining] = useState(false)
+
   // 加密（HmacSHA256）
   const encryption = (val: string) => {
     const Ciphertext = CryptoJS.HmacSHA256(val, 'DADUDU_CMS');
@@ -20,12 +22,14 @@ const Login: FC<RouteComponentProps> = () => {
   }
   // 提交表单且数据验证成功后回调事件
   const onFinish = async (values: UserInfo) => {
+    setLogining(true);
     const { user_name, password } = values;
     const params = { user_name, password: encryption(password) }
     // console.log('onFinish => ', values, params);
     const res = await login(params);
+    setLogining(false)
     if (res?.error_code === '00') {
-      history.replace("/home");
+      history.replace("/app");
     } else {
       message.error(res?.error_msg);
     }
@@ -86,7 +90,7 @@ const Login: FC<RouteComponentProps> = () => {
               span: 19,
             }}
           >
-            <Button type='primary' htmlType='submit'>
+            <Button type='primary' htmlType='submit' loading={logining}>
               登录
             </Button>
           </Form.Item>

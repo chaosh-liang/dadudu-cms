@@ -89,7 +89,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = () => {
       render: (text: string, record: Required<SeriesT>) => (
         <Link
           title='跳转至商品'
-          to={`/home/goods_info/goods?_key=${record._id}`}
+          to={`/app/home/goods?_key=${record._id}`}
         >
           {text}
         </Link>
@@ -159,7 +159,7 @@ const Series: FC<RouteComponentProps<{ id: string }>> = () => {
     },
   ];
 
-  const categoryData = useSelector((state: any) => state.goodsinfo.category);
+  const categoryData = useSelector((state: any) => state.home.category);
 
   useEffect(() => {
     // console.log('series useEffect');

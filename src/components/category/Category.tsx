@@ -135,7 +135,7 @@ const Category: FC<RouteComponentProps> = () => {
   // 从 store 中获取类别数据
   const categoryData = useSelector((state: any) => {
     const {
-      goodsinfo: { category },
+      home: { category },
     } = state;
     const copy = cloneDeep(category);
     copy.forEach((item: CategoryT) => {
