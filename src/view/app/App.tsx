@@ -33,7 +33,7 @@ const App: FC<RouteComponentProps> = () => {
   const dispatch = useDispatch();
 
   const menu = [
-    { name: '主页', route: `${path}/home` },
+    { name: '商品管理', route: `${path}/home` }, // 主页 => 商品管理
     { name: '订单管理', route: `${path}/order` },
     { name: '设置中心', route: `${path}/settings` },
   ];

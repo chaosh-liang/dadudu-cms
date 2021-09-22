@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   Table,
@@ -11,14 +11,20 @@ import {
   Drawer,
   Carousel,
 } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import {
+  ExclamationCircleOutlined,
+  LeftOutlined,
+  RightOutlined,
+} from '@ant-design/icons';
 import type { GoodsT } from '@/@types/goods';
 import type { ColumnType } from 'rc-table/lib/interface';
 import { useRequest } from 'ahooks';
 import { fetchAllGoods, deleteGoods } from '@/api/goods';
+import classNames from 'classnames';
 import { formatDate } from '@/utils';
 import AEGModal from './AEGModal';
 import styles from './Goods.module.scss';
+import type { CarouselRef } from 'antd/lib/carousel';
 
 const Goods: FC<RouteComponentProps> = () => {
   const initOvData = {
@@ -48,6 +54,7 @@ const Goods: FC<RouteComponentProps> = () => {
   const [selectionRows, setSelectionRows] = useState<Required<GoodsT>[]>([]);
   // const [ovData, setOVData] = useState<GoodsT & Record<string, any>>(initOvData);
   const [ovData, setOVData] = useState<GoodsT>(initOvData);
+  const carouselEl = useRef<CarouselRef>(null);
 
   // 获取所有商品
   const { data, loading: fetchAllGoodsLoading } = useRequest(
@@ -387,13 +394,27 @@ const Goods: FC<RouteComponentProps> = () => {
         getContainer={false} // 挂载在当前 div 节点下，而不是 document.body
       >
         <div className={styles['phone-emulator']}>
-          <Carousel>
-            {ovData.banner_url.map((url) => (
-              <div className={styles['carousel-item']} key={url}>
-                <img alt='banner-url' src={url} />
-              </div>
-            ))}
-          </Carousel>
+          <div className={styles['carousel-box']}>
+            <div
+              className={classNames(styles['carousel-trigger'], styles.left)}
+              onClick={() => carouselEl.current?.prev()}
+            >
+              <LeftOutlined />
+            </div>
+            <div
+              className={classNames(styles['carousel-trigger'], styles.right)}
+              onClick={() => carouselEl.current?.next()}
+            >
+              <RightOutlined />
+            </div>
+            <Carousel ref={carouselEl}>
+              {ovData.banner_url.map((url) => (
+                <div className={styles['carousel-item']} key={url}>
+                  <img alt='banner-url' src={url} />
+                </div>
+              ))}
+            </Carousel>
+          </div>
           <div className={styles['price-area']}>
             <div className={styles['price-info']}>
               <span className={styles.price}>
@@ -417,10 +438,7 @@ const Goods: FC<RouteComponentProps> = () => {
           <div className={styles['desc-box']}>
             {ovData.desc_url.map((url) => (
               <div className={styles['img-wrapper']} key={url}>
-                <img
-                  alt='desc-url'
-                  src={url}
-                />
+                <img alt='desc-url' src={url} />
               </div>
             ))}
           </div>
