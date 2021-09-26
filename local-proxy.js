@@ -3,7 +3,7 @@
  * @Email: broli.up.up.up@gmail.com
  * @Date: 2021-09-16 10:06:32
  * @LastEditors: Broli
- * @LastEditTime: 2021-09-20 16:39:17
+ * @LastEditTime: 2021-09-24 13:52:08
  * @Description: 本地地理配置，不用提交
  */
 module.exports = {
@@ -12,6 +12,6 @@ module.exports = {
     target: 'http://localhost:7716/cms/dadudu', // 本地服务
     // target: 'http://101.34.21.222/cms/dadudu', // 线上服务-无需端口
     secure: false,
-    changeOrigin: true,
-  },
+    changeOrigin: true
+  }
 }

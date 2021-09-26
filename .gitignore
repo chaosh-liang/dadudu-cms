@@ -1,30 +1,15 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
+node_modules
+.DS_Store
+*.local
 
 # production
 /build
 /dist*
-/dadudu
-dll_dev
-dll_pro
-analyzer
+/dll_*
 local-proxy.js
 *.zip
 
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
+# log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
